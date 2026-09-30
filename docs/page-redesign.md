@@ -31,3 +31,16 @@ Inspected official pages for [OpenVLA](https://openvla.github.io/), [Octo](https
 ## Release and rollback
 
 Validate the paper's values and terminology, source-media hashes, responsive layout, gallery selection, playback synchronization, focus, and public asset links before considering the deployment complete. Revert the redesign commit and republish `main` to restore the baseline. Original presentation and research source files remain outside the public repository.
+
+
+## Reader and player refinement
+
+Baseline: `main`, `6e8daae6fb435d132cb7adb7c927d5c113a26c25`.
+
+The refinement defines VLA, 3D flow, TCP, and the action representation before using them. Two native MathML equations retain their scientific meaning, with visible interpretations and a definition for every symbol. The mobile objective wraps onto two aligned lines. The method is organized into three full-size subsection headings; small duplicate section labels are removed.
+
+The layout uses two centered axes: 760px for reading and 1120px for figures, tables, and video groups. Major headings identify the sections in navigation. Shared spacing, caption footers, and equal media columns distinguish examples from explanations. The diagram offers an immediate scroll/full-figure cue on narrow screens.
+
+All videos now start on reader request. Each uses the same play/pause, seek, elapsed-time, restart, and enlarge controls directly below the video. Group play/pause, seeking, and restart sit directly above the corresponding comparison or four-view visualization. Comparison clips retain their own source speeds and durations; a shorter clip waits at its end. The four Stack Cups views synchronize at their original rate. Switching tasks or hiding the browser pauses playback without automatic resumption. JavaScript-free pages retain native controls.
+
+Original media bytes, all scientific table values, publication paths, and existing section anchors are preserved. The local preview server now supports byte-range requests for reliable seeking. Applied reusable guidance on meaningful headings, explained equations, shared layout axes, and media controls placed beside their targets. No migration or user action is needed; reverting this refinement commit restores the previous presentation.

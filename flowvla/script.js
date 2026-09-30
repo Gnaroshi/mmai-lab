@@ -48,14 +48,14 @@
     g.token++; g.pending = false; g.running = false; g.videos.forEach(pauseOne); status(g.ui, ''); updateGroup(g);
   }
   function independent(v) { const g = membership.get(v); if (g?.coordinated || g?.pending) { if (g.running) g.time = g.master.currentTime; g.token++; g.pending = false; g.running = false; g.coordinated = false; status(g.ui, ''); updateGroup(g); } }
-  function ready(v, level = 2) {
-    if (v.readyState >= level) return Promise.resolve();
+  function ready(v, level = 3) {
+    if (v.readyState >= level && (level === 1 || !v.seeking)) return Promise.resolve();
     v.preload = level === 1 ? 'metadata' : 'auto';
     return new Promise((resolve, reject) => {
       const event = level === 1 ? 'loadedmetadata' : 'canplay'; let timer;
-      const done = error => { clearTimeout(timer); v.removeEventListener(event, ok); v.removeEventListener('error', fail); error ? reject(error) : resolve(); };
-      const ok = () => done(), fail = () => done(new Error('Video unavailable'));
-      v.addEventListener(event, ok); v.addEventListener('error', fail);
+      const done = error => { clearTimeout(timer); v.removeEventListener(event, ok); v.removeEventListener('seeked', ok); v.removeEventListener('error', fail); error ? reject(error) : resolve(); };
+      const ok = () => { if (v.readyState >= level && (level === 1 || !v.seeking)) done(); }, fail = () => done(new Error('Video unavailable'));
+      v.addEventListener(event, ok); v.addEventListener('seeked', ok); v.addEventListener('error', fail);
       timer = setTimeout(() => done(new Error('Video loading timed out')), 30000);
       if (v.error || (v.readyState === 0 && v.networkState !== 2)) v.load();
     });
@@ -78,13 +78,23 @@
   async function playGroup(g, restart = false) {
     pauseGroup(g); const token = g.token; g.pending = true; status(g.ui, 'Loading videos…', true); updateGroup(g);
     try {
-      await Promise.all(g.videos.map(v => ready(v)));
+      await Promise.all(g.videos.map(v => ready(v, duration(v) > 0 && v.currentTime >= duration(v) - 0.03 ? 1 : 3)));
       if (token !== g.token || !g.videos.every(available)) return;
       const d = groupDuration(g); g.master = g.videos.reduce((a, b) => duration(a) >= duration(b) ? a : b);
       if (restart || !g.coordinated || g.time >= d - 0.03) g.time = 0;
       g.coordinated = true;
-      g.videos.forEach(v => { v.currentTime = Math.min(g.time, duration(v)); });
-      await Promise.all(g.videos.filter(v => g.time < duration(v) - 0.03).map(v => v.play()));
+      g.videos.forEach(v => { const target = Math.min(g.time, duration(v)); if (Math.abs(v.currentTime - target) > 0.02) v.currentTime = target; });
+      await Promise.all(g.videos.map(v => ready(v, duration(v) > 0 && v.currentTime >= duration(v) - 0.03 ? 1 : 3)));
+      if (token !== g.token || !g.videos.every(available)) return;
+      const active = g.videos.filter(v => g.time < duration(v) - 0.03);
+      if (g.sync) {
+        await Promise.all(active.map(async v => { await v.play(); if (token === g.token) v.pause(); }));
+        if (token !== g.token || !g.videos.every(available)) return;
+        active.forEach(v => { if (Math.abs(v.currentTime - g.time) > 0.001) v.currentTime = g.time; });
+        await Promise.all(active.map(v => ready(v)));
+        if (token !== g.token || !g.videos.every(available)) return;
+      }
+      await Promise.all(active.map(v => v.play()));
       if (token === g.token) { g.running = true; status(g.ui, ''); }
     } catch (_) { if (token === g.token) { g.videos.forEach(v => v.pause()); status(g.ui, 'Unable to play. Press Play together to retry.'); } }
     finally { if (token === g.token) { g.pending = false; updateGroup(g); } }
@@ -145,7 +155,7 @@
     if (time - lastSync > 200) {
       lastSync = time; groups.filter(g => g.running).forEach(g => {
         if (g.videos.every(v => v.paused || v.ended)) { g.running = false; updateGroup(g); return; }
-        if (g.sync && !g.master.paused) g.videos.filter(v => v !== g.master && !v.paused).forEach(v => { if (Math.abs(v.currentTime - g.master.currentTime) > 0.1) v.currentTime = g.master.currentTime; });
+        if (g.sync && !g.master.paused) g.videos.filter(v => v !== g.master && !v.paused && !v.seeking).forEach(v => { if (Math.abs(v.currentTime - g.master.currentTime) > 0.1) v.currentTime = g.master.currentTime; });
         updateGroup(g);
       });
     }

@@ -1,156 +1,159 @@
-'use strict';
-document.documentElement.classList.add('js');
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const videos = [...document.querySelectorAll('.loop-video')];
-const visible = new Set();
-const pausedByUser = new WeakSet();
-const manuallyPlaying = new WeakSet();
-const globalToggle = document.querySelector('#toggle-motion');
-const dialog = document.querySelector('#video-dialog');
-const expanded = document.querySelector('#expanded-video');
-let motionEnabled = !reducedMotion.matches;
-let dialogTrigger = null;
-function updateButton(video) {
-  const button = video.closest('.media-shell').querySelector('.clip-toggle');
-  const name = video.closest('.media-shell').dataset.title;
-  button.textContent = video.paused ? 'Play' : 'Pause';
-  button.setAttribute('aria-label', `${video.paused ? 'Play' : 'Pause'} ${name}`);
-  button.setAttribute('aria-pressed', String(!video.paused));
-}
-function refreshVideos() {
-  videos.forEach(video => {
-    if ((motionEnabled || manuallyPlaying.has(video)) && visible.has(video) && !video.closest('[hidden]') && !document.hidden && !dialog.open && !pausedByUser.has(video)) {
-      video.play().catch(() => updateButton(video));
-    } else video.pause();
-    updateButton(video);
+(() => {
+  'use strict';
+  const $ = (q, root = document) => root.querySelector(q);
+  const $$ = (q, root = document) => [...root.querySelectorAll(q)];
+  const videos = $$('.loop-video');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let motion = !reduced.matches, motionChosen = false, syncToken = 0, syncLoading = false;
+  const state = new WeakMap(videos.map(v => [v, { inView: false, manualPause: false, manualPlay: false }]));
+  const sync = videos.filter(v => v.dataset.sync === 'aggregation');
+  const motionButton = $('#toggle-motion');
+  const dialog = $('#video-dialog'), expanded = $('#expanded-video');
+  let opener = null;
+  const available = v => !v.closest('[hidden]') && !document.hidden && !dialog?.open;
+  const inView = v => available(v) && state.get(v).inView;
+  const syncAllowed = () => (motion || sync.every(v => state.get(v).manualPlay)) && sync.some(inView) && !sync.some(v => state.get(v).manualPause);
+  const label = v => {
+    const b = $('.clip-toggle', v.closest('.media-shell'));
+    if (b) { b.textContent = v.paused ? 'Play' : 'Pause'; b.setAttribute('aria-label', `${v.paused ? 'Play' : 'Pause'} ${v.closest('.media-shell').dataset.title || 'video'}`); b.setAttribute('aria-pressed', String(!v.paused)); }
+  };
+  const play = v => { if (available(v)) { v.muted = true; v.play().catch(() => label(v)); } };
+  const pauseSync = () => { syncToken++; syncLoading = false; sync.forEach(v => v.pause()); };
+  const ready = v => new Promise((resolve, reject) => {
+    if (v.readyState >= 3) return resolve();
+    let timer;
+    const done = error => { clearTimeout(timer); v.removeEventListener('canplay', ok); v.removeEventListener('error', fail); error ? reject(error) : resolve(); };
+    const ok = () => done(), fail = () => done(new Error('Video unavailable'));
+    v.addEventListener('canplay', ok); v.addEventListener('error', fail);
+    timer = setTimeout(() => done(new Error('Loading timed out')), 30000);
+    if (v.readyState === 0 && v.networkState !== 2) v.load();
   });
-  globalToggle.textContent = motionEnabled ? 'Pause videos' : 'Play videos';
-  globalToggle.setAttribute('aria-pressed', String(motionEnabled));
-}
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target));
-  refreshVideos();
-}, {threshold:0.15});
-videos.forEach(video => {
-  video.controls = false;
-  observer.observe(video);
-  video.addEventListener('play', () => updateButton(video));
-  video.addEventListener('pause', () => updateButton(video));
-  const shell = video.closest('.media-shell');
-  shell.querySelector('.clip-toggle').addEventListener('click', () => {
-    if (video.paused) {
-      pausedByUser.delete(video);
-      manuallyPlaying.add(video);
-      video.play().catch(() => updateButton(video));
-    } else {
-      pausedByUser.add(video);
-      manuallyPlaying.delete(video);
-      video.pause();
+  const syncButtons = text => $$('[data-replay="aggregation"]').forEach(b => { b.textContent = text; b.setAttribute('aria-busy', String(text === 'Loading…')); });
+  async function playSync(restart = false, manual = false) {
+    if (!sync.length || syncLoading || (!manual && !syncAllowed())) return;
+    const token = ++syncToken; syncLoading = true; syncButtons('Loading…');
+    if (manual) sync.forEach(v => { state.get(v).manualPause = false; state.get(v).manualPlay = true; });
+    try {
+      await Promise.all(sync.map(ready));
+      if (token !== syncToken || !sync.every(available) || (!manual && !syncAllowed())) return;
+      const time = restart ? 0 : sync[0].currentTime;
+      sync.forEach(v => { v.currentTime = time; v.muted = true; });
+      await Promise.all(sync.map(v => v.play()));
+      syncButtons('Replay together');
+    } catch (_) { if (token === syncToken) { sync.forEach(v => v.pause()); syncButtons('Retry playback'); } }
+    finally { if (token === syncToken) syncLoading = false; }
+  }
+  const updateMotion = () => {
+    if (motionButton) { motionButton.textContent = motion ? 'Pause videos' : 'Play videos'; motionButton.setAttribute('aria-pressed', String(!motion)); }
+  };
+  function refresh() {
+    videos.filter(v => !sync.includes(v)).forEach(v => {
+      if ((motion || state.get(v).manualPlay) && inView(v) && !state.get(v).manualPause) play(v); else v.pause();
+    });
+    if (syncAllowed()) { if (sync.every(v => v.paused)) playSync(); }
+    else { pauseSync(); syncButtons('Replay together'); }
+  }
+  videos.forEach(v => {
+    v.muted = true; v.defaultMuted = true; v.playsInline = true;
+    const shell = v.closest('.media-shell'), toggle = shell && $('.clip-toggle', shell);
+    if (toggle) {
+      v.controls = false; toggle.hidden = false;
+      toggle.addEventListener('click', () => {
+        if (sync.includes(v)) {
+          if (!v.paused || syncLoading) { sync.forEach(x => state.get(x).manualPause = true); pauseSync(); syncButtons('Replay together'); }
+          else playSync(false, true);
+        } else { state.get(v).manualPause = !v.paused; state.get(v).manualPlay = v.paused; v.paused ? play(v) : v.pause(); }
+      });
+    }
+    v.addEventListener('play', () => label(v)); v.addEventListener('pause', () => label(v)); label(v);
+    const expand = shell && $('.clip-expand', shell);
+    if (expand && dialog && expanded) {
+      expand.hidden = false;
+      expand.addEventListener('click', () => {
+        opener = expand; const position = v.currentTime;
+        $('#dialog-title').textContent = shell.dataset.title || 'Video';
+        expanded.src = v.currentSrc || $('source', v)?.getAttribute('src') || v.getAttribute('src');
+        expanded.muted = true; expanded.controls = true; expanded.playsInline = true;
+        expanded.onloadedmetadata = () => { expanded.currentTime = Math.min(position, expanded.duration || position); expanded.play().catch(() => {}); };
+        dialog.showModal(); pauseSync(); videos.forEach(x => x.pause());
+      });
     }
   });
-  shell.querySelector('.clip-expand').addEventListener('click', event => {
-    dialogTrigger = event.currentTarget;
-    document.querySelector('#dialog-title').textContent = shell.dataset.title;
-    expanded.src = video.currentSrc || video.querySelector('source').src;
-    expanded.poster = video.poster;
-    expanded.currentTime = video.currentTime;
-    dialog.showModal();
-    refreshVideos();
-    if (!reducedMotion.matches) expanded.play().catch(() => {});
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => state.get(e.target).inView = e.isIntersecting && e.intersectionRatio > 0);
+      refresh();
+    }, { threshold: [0, 0.05] });
+    videos.forEach(v => observer.observe(v));
+  } else {
+    videos.forEach(v => { v.controls = true; const b = $('.clip-toggle', v.closest('.media-shell')); if (b) b.hidden = true; });
+  }
+  $$('.media-gallery[data-gallery]').forEach(gallery => {
+    const choices = $$('[data-choice]', gallery), panels = $$('[data-panel]', gallery);
+    const select = choice => {
+      choices.forEach(b => { const selected = b === choice; b.setAttribute('aria-pressed', String(selected)); b.classList.toggle('is-active', selected); });
+      panels.forEach(p => { p.hidden = p.dataset.panel !== choice.dataset.choice; if (p.hidden) $$('video', p).forEach(v => v.pause()); });
+      refresh();
+    };
+    choices.forEach(b => b.addEventListener('click', () => select(b)));
+    if (choices[0]) select(choices.find(b => b.getAttribute('aria-pressed') === 'true') || choices[0]);
   });
-});
-globalToggle.addEventListener('click', () => {
-  motionEnabled = !motionEnabled;
-  videos.forEach(video => manuallyPlaying.delete(video));
-  if (motionEnabled) videos.forEach(video => pausedByUser.delete(video));
-  refreshVideos();
-});
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) expanded.pause();
-  refreshVideos();
-});
-reducedMotion.addEventListener('change', event => {
-  if (event.matches) {motionEnabled = false; expanded.pause(); refreshVideos();}
-});
-document.querySelector('#close-dialog').addEventListener('click', () => dialog.close());
-dialog.addEventListener('click', event => {if (event.target === dialog) {const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
-dialog.addEventListener('close', () => {expanded.pause(); expanded.removeAttribute('src');expanded.load();refreshVideos();dialogTrigger?.focus();});
-
-const filters = [...document.querySelectorAll('[data-filter]')];
-function filterDemos(filter) {
-  filters.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.filter === filter)));
-  document.querySelectorAll('.demo-card').forEach(card => {card.hidden = filter !== 'all' && card.dataset.category !== filter;});
-  refreshVideos();
-}
-filters.forEach(button => button.addEventListener('click', () => filterDemos(button.dataset.filter)));
-filterDemos('spatial');
-// Use a common source timeline for the four views of the same recorded sequence.
-const sceneVideos = videos.filter(video => video.dataset.sync === 'scene');
-document.querySelector('#restart-scene').addEventListener('click', async () => {
-  await Promise.all(sceneVideos.map(video => new Promise(resolve => {
-    video.pause();
-    if (video.readyState >= 1) return resolve();
-    video.addEventListener('loadedmetadata', resolve, {once:true});
-    video.addEventListener('error', resolve, {once:true});
-    video.load();
-  })));
-  sceneVideos.forEach(video => {video.currentTime=0;pausedByUser.delete(video);});
-  motionEnabled = true; refreshVideos();
-});
-// Correct drift only among currently playing views, without loading offscreen videos.
-setInterval(() => {
-  const active = sceneVideos.filter(v => !v.paused && v.readyState >= 2);
-  const reference = active[0];
-  if (reference) active.slice(1).forEach(video => {
-    if (Math.abs(video.currentTime-reference.currentTime)>.35) video.currentTime=reference.currentTime;
+  $$('.replay-group').forEach(button => {
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      if (button.dataset.replay === 'aggregation') { await playSync(true, true); return; }
+      const group = $$('video', button.closest('[data-panel]') || button.closest('.media-gallery') || button.parentElement);
+      const text = button.textContent; button.textContent = 'Loading…'; button.setAttribute('aria-busy', 'true');
+      try {
+        await Promise.all(group.map(ready));
+        if (group.every(available)) { group.forEach(v => { if (state.has(v)) { state.get(v).manualPause = false; state.get(v).manualPlay = true; } v.currentTime = 0; }); await Promise.all(group.map(v => v.play())); }
+        button.textContent = text;
+      } catch (_) { button.textContent = 'Retry playback'; }
+      finally { button.setAttribute('aria-busy', 'false'); }
+    });
   });
-},1000);
-
-const tcpButtons = [...document.querySelectorAll('[data-tcp]')];
-function showTCP(task) {
-  tcpButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tcp === task)));
-  document.querySelectorAll('[data-tcp-panel]').forEach(panel => {panel.hidden = panel.dataset.tcpPanel !== task;});
-  refreshVideos();
-}
-tcpButtons.forEach(button => button.addEventListener('click', () => showTCP(button.dataset.tcp)));
-if (tcpButtons.length) showTCP('cabinet');
-
-const tabs = [...document.querySelectorAll('[role="tab"]')];
-function activateTab(tab, focus=false) {
-  tabs.forEach(button => {
-    const active = button === tab;
-    button.setAttribute('aria-selected', String(active));button.tabIndex=active?0:-1;
-    document.getElementById(button.getAttribute('aria-controls')).hidden=!active;
-  });
-  if(focus)tab.focus();
-}
-tabs.forEach((tab,index)=>{
-  tab.addEventListener('click',()=>activateTab(tab));
-  tab.addEventListener('keydown',event=>{
-    let next;
-    if(event.key==='ArrowRight')next=(index+1)%tabs.length;
-    if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;
-    if(event.key==='Home')next=0;
-    if(event.key==='End')next=tabs.length-1;
-    if(next!==undefined){event.preventDefault();activateTab(tabs[next],true);}
-  });
-});
-activateTab(tabs[0]);
-
-document.querySelector('#copy-citation').addEventListener('click',async()=>{
-  const text=document.querySelector('#bibtex').textContent;
-  const button=document.querySelector('#copy-citation');
-  const status=document.querySelector('#copy-status');
-  try{
-    if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);
-    else{
-      const field=document.createElement('textarea');field.value=text;field.style.cssText='position:fixed;left:-9999px';document.body.append(field);field.select();
-      const success=document.execCommand('copy');field.remove();if(!success)throw new Error();button.focus();
+  let lastSync = 0;
+  const correctSync = time => {
+    if (time - lastSync > 500 && sync.length && !sync[0].paused && !syncLoading) {
+      lastSync = time;
+      sync.slice(1).forEach(v => { if (!v.paused && Math.abs(v.currentTime - sync[0].currentTime) > 0.16) v.currentTime = sync[0].currentTime; });
     }
-    status.textContent='Citation copied';button.textContent='Copied';
-  }catch(_){status.textContent='Select the citation to copy.';button.textContent='Try again';}
-});
-document.querySelectorAll('a[href^="#"]').forEach(anchor=>anchor.addEventListener('click',()=>{
-  const target=document.getElementById(anchor.hash.slice(1));
-  if(target?.hasAttribute('tabindex'))setTimeout(()=>target.focus({preventScroll:true}),0);
-}));
+    requestAnimationFrame(correctSync);
+  };
+  requestAnimationFrame(correctSync);
+  motionButton?.addEventListener('click', () => {
+    motionChosen = true; motion = !motion;
+    videos.forEach(v => { state.get(v).manualPlay = false; if (motion) state.get(v).manualPause = false; });
+    updateMotion(); refresh();
+  });
+  reduced.addEventListener('change', () => { if (!motionChosen) { motion = !reduced.matches; updateMotion(); refresh(); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) expanded?.pause(); refresh(); });
+  $('#close-dialog')?.addEventListener('click', () => dialog.close());
+  dialog?.addEventListener('click', e => { if (e.target === dialog) { const r = dialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close(); } });
+  dialog?.addEventListener('close', () => {
+    expanded.pause(); expanded.removeAttribute('src'); expanded.load(); expanded.onloadedmetadata = null;
+    opener?.focus({ preventScroll: true }); refresh();
+  });
+  $('#copy-citation')?.addEventListener('click', async () => {
+    const text = $('#bibtex').textContent.trim(), status = $('#copy-status');
+    try { await navigator.clipboard.writeText(text); status.textContent = 'Citation copied.'; }
+    catch (_) { const selection = getSelection(), range = document.createRange(); range.selectNodeContents($('#bibtex')); selection.removeAllRanges(); selection.addRange(range); status.textContent = 'Select and copy the citation below.'; }
+  });
+  const links = $$('.main-nav a[href^="#"]').filter(a => a.hash.length > 1 && document.getElementById(a.hash.slice(1)));
+  const focusHash = () => {
+    if (location.hash.length < 2) return;
+    let target; try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (_) { return; }
+    if (target) { if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
+  };
+  let navQueued = false;
+  const updateNav = () => {
+    navQueued = false; let current = links[0];
+    links.forEach(a => { if ($(a.getAttribute('href')).getBoundingClientRect().top <= Math.min(innerHeight * 0.35, 220)) current = a; });
+    links.forEach(a => { if (a === current) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+  };
+  window.addEventListener('scroll', () => { if (!navQueued) { navQueued = true; requestAnimationFrame(updateNav); } }, { passive: true });
+  window.addEventListener('hashchange', () => { focusHash(); updateNav(); });
+  $$('a[href^="#"]').forEach(a => a.addEventListener('click', () => setTimeout(focusHash, 0)));
+  updateMotion(); updateNav(); if (location.hash) requestAnimationFrame(focusHash);
+  document.documentElement.classList.add('js');
+})();

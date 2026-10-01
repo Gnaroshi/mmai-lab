@@ -10,9 +10,9 @@ MMAI Lab · Ajou University
 
 This repository contains the research project website and its public paper, figures, and demonstration videos. It does not contain the model implementation or training code.
 
-The 27 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without cropping, trimming, transcoding, or speed changes. The complete submitted video appears once as the overview. Task names, instructions, method explanations, and quantitative results follow the paper.
+The 27 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without trimming, transcoding, or speed changes. Static display viewports hide only verified blank border pixels in five visualization clips; the underlying files remain unchanged. The complete submitted video appears once as the overview. Task names, instructions, method explanations, and quantitative results follow the paper.
 
-The page introduces the research through the overview and abstract, explains the training method alongside its visualizations, then presents real-world and simulation experiments. Component ablations and supervision comparisons remain visible in the main page.
+The page introduces the problem and core idea, explains the method conceptually, then presents simulation and real-world experiments, baseline comparisons, and qualitative visualizations. Component ablations and supervision comparisons remain visible in the main page.
 
 ## Editing and preview
 

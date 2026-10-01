@@ -8,7 +8,7 @@
   let opener = null, expandedSource = null;
   const duration = v => Number.isFinite(v.duration) ? v.duration : Number(v.dataset.duration) || 0;
   const format = n => Number.isFinite(n) ? `${Math.floor(Math.max(0, n) / 60)}:${String(Math.floor(Math.max(0, n) % 60)).padStart(2, '0')}` : '--:--';
-  const available = v => !v.closest('[hidden]') && !document.hidden && !dialog?.open;
+  const available = v => !v.closest('[hidden]') && !document.hidden && (v === expanded ? dialog?.open : !dialog?.open);
   const node = (tag, className, text) => { const n = document.createElement(tag); n.className = className; if (text) n.textContent = text; return n; };
   const button = (cls, text, label) => { const b = node('button', cls, text); b.type = 'button'; b.setAttribute('aria-label', label || text); return b; };
   function toolbar(prefix, title, grouped = false) {
@@ -117,18 +117,27 @@
     const shell = v.closest('.media-shell') || v.parentElement, title = shell.dataset.title || v.getAttribute('aria-label') || 'video';
     const ui = toolbar('player', title), s = { ui, title, token: 0, pending: false, seeking: false };
     states.set(v, s); v.controls = false; v.autoplay = false; v.removeAttribute('autoplay'); v.loop = false; v.playsInline = true;
-    v.insertAdjacentElement('afterend', ui.bar);
+    shell.append(ui.bar);
     ui.play.addEventListener('click', () => { if (!v.paused || s.pending) { independent(v); pauseOne(v); } else playOne(v); });
     ui.restart.addEventListener('click', () => playOne(v, true));
     wireSeek(ui, s, ratio => seekOne(v, ratio), () => !v.paused || s.pending, () => playOne(v));
     ['loadedmetadata', 'durationchange', 'timeupdate', 'play', 'pause', 'ended', 'seeked'].forEach(event => v.addEventListener(event, () => { updateVideo(v); const g = membership.get(v); if (g) updateGroup(g); }));
     v.addEventListener('error', () => { if (s.pending) return; status(ui, 'Unable to load video. Press Play to retry.'); });
-    ui.enlarge.hidden = !dialog || !expanded;
+    ui.enlarge.hidden = v === expanded || !dialog || !expanded;
     ui.enlarge.addEventListener('click', () => {
       if (!dialog || !expanded) return;
       opener = ui.enlarge; expandedSource = v; groups.forEach(pauseGroup); videos.forEach(pauseOne);
-      $('#dialog-title').textContent = title; expanded.muted = v.muted; expanded.volume = v.volume; expanded.controls = true; expanded.loop = false;
+      $('#dialog-title').textContent = title; expanded.muted = v.muted; expanded.volume = v.volume; expanded.loop = false;
       const position = v.currentTime;
+      const viewport = v.closest('.video-viewport');
+      expanded.closest('.video-viewport').setAttribute('style', viewport?.getAttribute('style') || '');
+      expanded.closest('.media-shell').style.setProperty('--expanded-ratio', viewport?.style.getPropertyValue('--video-ratio') || 4/3);
+      const expandedState = states.get(expanded);
+      expandedState.title = title; expanded.dataset.duration = duration(v); expanded.poster = v.poster;
+      expanded.controls = false; expanded.setAttribute('aria-label', title);
+      expandedState.ui.seek.setAttribute('aria-label', `Seek enlarged ${title}`);
+      expandedState.ui.restart.setAttribute('aria-label', `Restart enlarged ${title} from the beginning`);
+      updateVideo(expanded);
       expanded.onloadedmetadata = () => { expanded.currentTime = Math.min(position, expanded.duration); };
       expanded.src = v.currentSrc || $('source', v)?.getAttribute('src') || v.getAttribute('src'); dialog.showModal();
     });
@@ -146,8 +155,15 @@
     const choices = $$('[data-choice]', gallery), panels = $$('[data-panel]', gallery);
     const select = choice => {
       choices.forEach(b => { const selected = b === choice; b.setAttribute('aria-pressed', String(selected)); b.classList.toggle('is-active', selected); });
-      panels.forEach(p => { p.hidden = p.dataset.panel !== choice.dataset.choice; if (p.hidden) { groups.filter(g => p.contains(g.videos[0])).forEach(pauseGroup); $$('video', p).filter(v => states.has(v)).forEach(pauseOne); } });
+      panels.forEach(p => { p.hidden = p.dataset.panel !== choice.dataset.choice; p.inert = p.hidden; p.toggleAttribute('inert', p.hidden); p.setAttribute('aria-hidden', String(p.hidden)); if (p.hidden) { groups.filter(g => p.contains(g.videos[0])).forEach(pauseGroup); $$('video', p).filter(v => states.has(v)).forEach(pauseOne); } });
     };
+    const alignHeadings = () => {
+      const headings = panels.map(p => $('.task-heading', p)).filter(Boolean);
+      gallery.style.removeProperty('--task-heading-height');
+      if (headings.length) gallery.style.setProperty('--task-heading-height', `${Math.ceil(Math.max(...headings.map(h => h.scrollHeight)))}px`);
+    };
+    const resize = new ResizeObserver(alignHeadings); resize.observe(gallery.querySelector('.choices'));
+    alignHeadings();
     choices.forEach(b => b.addEventListener('click', () => select(b))); if (choices.length) select(choices.find(b => b.getAttribute('aria-pressed') === 'true') || choices[0]);
   });
   let lastSync = 0;

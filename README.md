@@ -21,7 +21,7 @@ The site uses plain HTML, CSS, and JavaScript; no build step is required.
 
 - `flowvla/index.html`: page content and metadata
 - `flowvla/styles.css`: layout and typography
-- `flowvla/script.js`: seekable video players, group playback, task galleries, compact navigation, and figure enlargement
+- `flowvla/script.js`: seekable video players, group playback, task galleries, current-position outline, and figure enlargement
 - `flowvla/assets/`: published paper, images, and videos
 
 From the repository root, run:
@@ -31,6 +31,8 @@ python3 tools/serve.py --directory . --port 8765
 ```
 
 Then open `http://127.0.0.1:8765/flowvla/`. The preview server supports HTTP byte ranges so original MP4 videos can be scrubbed without downloading the full file.
+
+On wide screens, the page outline sits beside the reading column and follows the current section and subsection. Below 1240 CSS pixels, the same outline appears in the header menu. A back-to-top control provides a return path through the long page.
 
 ## Deployment
 

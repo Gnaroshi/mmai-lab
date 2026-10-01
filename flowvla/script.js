@@ -216,8 +216,22 @@
     catch (_) { const selection = getSelection(), range = document.createRange(); range.selectNodeContents($('#bibtex')); selection.removeAllRanges(); selection.addRange(range); status.textContent = 'Select and copy the citation below.'; }
   });
   const navToggle = $('.nav-toggle'), nav = $('.main-nav');
+  function revealNavLink(container, link) {
+    if (!container || !link || !container.clientHeight || !link.getClientRects().length) return;
+    const bounds = container.getBoundingClientRect(), item = link.getBoundingClientRect();
+    const top = bounds.top + container.clientTop, bottom = top + container.clientHeight;
+    const inset = Math.min(8, container.clientHeight / 4);
+    if (item.top < top + inset) container.scrollTop += item.top - top - inset;
+    else if (item.bottom > bottom - inset) container.scrollTop += item.bottom - bottom + inset;
+  }
+  const queueNavReveal = (container, link) => requestAnimationFrame(() => {
+    if (link?.getAttribute('aria-current') === 'location') revealNavLink(container, link);
+  });
   const closeNav = () => { nav?.classList.remove('is-open'); navToggle?.setAttribute('aria-expanded', 'false'); };
-  navToggle?.addEventListener('click', () => { const open = nav.classList.toggle('is-open'); navToggle.setAttribute('aria-expanded', String(open)); });
+  navToggle?.addEventListener('click', () => {
+    const open = nav.classList.toggle('is-open'); navToggle.setAttribute('aria-expanded', String(open));
+    if (open) queueNavReveal(nav, $('a[aria-current="location"]', nav));
+  });
   $$('.main-nav a').forEach(a => a.addEventListener('click', closeNav));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && nav?.classList.contains('is-open')) { closeNav(); navToggle.focus(); } });
   document.addEventListener('click', e => { if (!e.target.closest('.site-header')) closeNav(); });
@@ -236,16 +250,88 @@
   $('#close-figure')?.addEventListener('click', () => figureDialog.close());
   figureDialog?.addEventListener('click', e => { if (e.target === figureDialog) { const r = figureDialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) figureDialog.close(); } });
   figureDialog?.addEventListener('close', () => figureOpener?.focus({ preventScroll: true }));
-  const links = $$('.main-nav a[href^="#"]').filter(a => a.hash.length > 1 && document.getElementById(a.hash.slice(1)));
+  const targetForHash = hash => {
+    if (!hash || hash.length < 2) return null;
+    try { return document.getElementById(decodeURIComponent(hash.slice(1))); } catch (_) { return null; }
+  };
+  const navRecords = root => root ? $$('a[href^="#"]', root).map(link => ({ link, target: targetForHash(link.hash) })).filter(record => record.target) : [];
+  const outlineRail = $('.page-outline'), outlineNav = $('.page-outline .outline-nav'), headerRecords = navRecords(nav), outlineRecords = navRecords(outlineNav);
+  const isMainLink = record => !record.link.closest('.outline-sublist');
+  const sectionRecords = [...outlineRecords.filter(isMainLink), ...headerRecords.filter(isMainLink)]
+    .filter((record, index, records) => records.findIndex(other => other.target === record.target) === index)
+    .sort((a, b) => a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+  const targetRecords = [...outlineRecords, ...headerRecords]
+    .filter((record, index, records) => records.findIndex(other => other.target === record.target) === index)
+    .filter(record => record.target.hasAttribute('data-outline-target') || sectionRecords.some(section => section.target === record.target));
+  const outlineItems = $$('.main-nav .outline-item[data-section], .page-outline .outline-item[data-section]');
+  const navLocation = $('.nav-toggle .nav-location'), backToTop = $('.back-to-top');
+  const visibleTarget = target => {
+    if (target.closest('[hidden], [inert], [aria-hidden="true"]') || !target.getClientRects().length) return false;
+    return getComputedStyle(target).visibility !== 'hidden';
+  };
+  const markCurrent = (records, current) => records.forEach(record => {
+    if (record === current) record.link.setAttribute('aria-current', 'location');
+    else record.link.removeAttribute('aria-current');
+  });
   const focusHash = () => {
-    if (location.hash.length < 2) return; let target;
-    try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (_) { return; }
+    const target = targetForHash(location.hash);
     if (target) { if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
   };
-  let navQueued = false;
-  const updateNav = () => { navQueued = false; let current = links[0]; links.forEach(a => { if ($(a.getAttribute('href')).getBoundingClientRect().top <= Math.min(innerHeight * 0.35, 220)) current = a; }); links.forEach(a => { if (a === current) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); }); };
-  window.addEventListener('scroll', () => { if (!navQueued) { navQueued = true; requestAnimationFrame(updateNav); } }, { passive: true });
-  window.addEventListener('hashchange', () => { focusHash(); updateNav(); });
-  $$('a[href^="#"]').forEach(a => a.addEventListener('click', () => setTimeout(focusHash, 0)));
-  updateNav(); if (location.hash) requestAnimationFrame(focusHash); document.documentElement.classList.add('js');
+  let navQueued = false, previousHeaderLink = null, previousOutlineLink = null;
+  const updateNav = () => {
+    navQueued = false;
+    const headerBottom = $('.site-header')?.getBoundingClientRect().bottom || 0;
+    const scrollPadding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const readingLine = Math.min(innerHeight - 1, Math.max(80, headerBottom + 24, scrollPadding + 1));
+    const sections = sectionRecords.filter(record => visibleTarget(record.target))
+      .map(record => ({ ...record, rect: record.target.getBoundingClientRect() }));
+    const atEnd = scrollY > 0 && Math.ceil(scrollY + innerHeight) >= document.documentElement.scrollHeight - 2;
+    const inHero = sections.length && sections[0].rect.top > readingLine;
+    let currentSection = sections[0];
+    for (const section of sections) if (section.rect.top <= readingLine) currentSection = section;
+    if (atEnd && sections.length) currentSection = sections[sections.length - 1];
+    let currentTarget = currentSection?.target;
+    if (currentSection && !inHero && !atEnd) {
+      const candidates = targetRecords.filter(record => record.target !== currentSection.target && currentSection.target.contains(record.target) && visibleTarget(record.target))
+        .map(record => ({ ...record, rect: record.target.getBoundingClientRect() }))
+        .filter(record => record.rect.top <= readingLine)
+        .sort((a, b) => a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+      const containing = candidates.filter(record => record.rect.bottom > readingLine);
+      currentTarget = (containing[containing.length - 1] || candidates[candidates.length - 1])?.target || currentTarget;
+    }
+    const sectionId = currentSection?.target.id;
+    const currentHeaderSection = headerRecords.find(record => isMainLink(record) && record.target === currentSection?.target);
+    const currentHeader = headerRecords.find(record => record.target === currentTarget) || currentHeaderSection;
+    const currentOutline = outlineRecords.find(record => record.target === currentTarget)
+      || outlineRecords.find(record => record.target === currentSection?.target);
+    markCurrent(headerRecords, currentHeader); markCurrent(outlineRecords, currentOutline);
+    outlineItems.forEach(item => item.classList.toggle('is-current-section', item.dataset.section === sectionId));
+    if (currentOutline?.link !== previousOutlineLink) {
+      previousOutlineLink = currentOutline?.link; queueNavReveal(outlineRail, previousOutlineLink);
+    }
+    if (currentHeader?.link !== previousHeaderLink) {
+      previousHeaderLink = currentHeader?.link;
+      if (nav?.classList.contains('is-open')) queueNavReveal(nav, previousHeaderLink);
+    }
+    if (navLocation) navLocation.textContent = inHero || !currentSection ? 'Sections' : (currentHeaderSection?.link.textContent || currentSection.link.textContent).trim();
+    if (backToTop) {
+      const visible = scrollY >= 500;
+      backToTop.classList.toggle('is-visible', visible); backToTop.hidden = !visible; backToTop.inert = !visible;
+      backToTop.toggleAttribute('inert', !visible); backToTop.setAttribute('aria-hidden', String(!visible));
+    }
+  };
+  const queueNav = () => { if (!navQueued) { navQueued = true; requestAnimationFrame(updateNav); } };
+  const followHash = () => { focusHash(); queueNav(); };
+  window.addEventListener('scroll', queueNav, { passive: true });
+  window.addEventListener('resize', queueNav);
+  window.addEventListener('load', queueNav);
+  window.addEventListener('hashchange', followHash);
+  window.addEventListener('popstate', followHash);
+  window.addEventListener('pageshow', queueNav);
+  $$('a[href^="#"]').forEach(a => a.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    setTimeout(followHash, 0);
+  }));
+  new ResizeObserver(queueNav).observe($('main') || document.body);
+  updateNav(); if (location.hash) requestAnimationFrame(followHash); document.documentElement.classList.add('js');
 })();

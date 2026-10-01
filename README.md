@@ -15,6 +15,8 @@ The 25 individual demonstration and visualization videos are the original MP4 fi
 
 The page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in Analysis, after the performance results. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
 
+Each result table groups its title and metric above the values, with source and evaluation notes below. Paper-derived tables link to the original PDF page; the LIBERO table identifies its added rebuttal rows, and additional π₀.₅ real-world experiments identify the rebuttal as their source.
+
 ## Editing and preview
 
 The site uses plain HTML, CSS, and JavaScript; no build step is required.

@@ -24,3 +24,23 @@
 @media(min-width:1240px){.page-outline{display:block}.js .nav-toggle,.js .main-nav,.js .main-nav.is-open{display:none}.header-paper{display:flex}}
 @media(max-width:600px){.compact-table th,.compact-table td{padding:7px 10px}.compact-table th:first-child{white-space:normal;max-width:170px}.compact-table{font-size:13px}.setup-layout{grid-template-columns:120px minmax(0,1fr);gap:14px;padding:10px}.setup-specs{font-size:13px}.setup-specs>div{grid-template-columns:1fr;gap:2px;padding:4px 0}.setup-specs dt{font-size:11px}.setup-specs dd span{font-size:11px}.back-to-top{right:16px;bottom:16px}.benchmark-table{min-width:600px}.method-venue{font-size:10px;margin-left:4px}}
 @media(max-width:380px){.setup-layout{grid-template-columns:96px minmax(0,1fr);gap:12px}.compact-table th,.compact-table td{padding-inline:8px}}
+
+/* A table keeps its title, metric, source, and evaluation notes together. */
+.table-block{border:1px solid var(--line);border-radius:var(--radius);background:white;overflow:hidden}
+.table-caption{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;margin:0;padding:11px 13px;background:var(--soft);line-height:1.4}
+.table-title{font-size:15px;font-weight:650;color:var(--ink)}
+.table-metric{font-size:13px;font-weight:400;color:var(--muted);white-space:nowrap}
+.table-block thead th{border-top:1px solid #bac6d3;background:#fafbfd}
+.table-block tbody tr:last-child>*{border-bottom:0}
+.table-footer{padding:9px 13px 11px;border-top:1px solid #bac6d3;background:#fafbfd;min-width:0}
+.table-provenance{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 6px;font-size:13px;line-height:1.5;color:#495866}
+.table-source-link{display:inline-flex;align-items:baseline;gap:5px;color:var(--accent);font-weight:600;text-decoration:underline;text-decoration-color:#b4c4df;text-underline-offset:3px}
+.table-source-link:hover{text-decoration-color:var(--accent)}
+.table-source-link>span{font-size:12px}.table-source-label{font-weight:600;color:var(--ink)}
+.table-footer .table-note{width:auto;min-width:0;margin:5px 0 0;font-size:13px;line-height:1.6;color:#495866}
+.compact-table .table-caption,.compact-table .table-footer{width:0;min-width:100%}
+.table-scroll:focus-visible{outline-offset:-3px}
+.research-figure figcaption{font-size:14px;color:#495866;line-height:1.6}
+@media(max-width:600px){.table-caption{padding:10px 11px;gap:3px 12px}.table-footer{padding:9px 11px 10px}.table-title{font-size:14px}.table-metric,.table-provenance,.table-footer .table-note,.research-figure figcaption{font-size:13px}}
+
+@media(max-width:600px){.benchmark-table th:first-child{min-width:170px;max-width:200px}}

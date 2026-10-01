@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>FlowVLA — Research Summary · CoRL 2026</title><meta name="description" content="FlowVLA distills manipulation-relevant 3D scene motion into VLA policies using training-only point-to-TCP supervision. Accepted at CoRL 2026. MMAI Lab, Ajou University."><meta name="author" content="Junhyeong Go, Mingyu Jung, Woobin Im, Jongbin Ryu"><meta name="citation_title" content="FlowVLA: Enabling World Dynamics Understanding through Pluggable 3D Flow Learning"><meta name="citation_author" content="Junhyeong Go"><meta name="citation_author" content="Mingyu Jung"><meta name="citation_author" content="Woobin Im"><meta name="citation_author" content="Jongbin Ryu"><meta name="citation_conference_title" content="Conference on Robot Learning"><meta name="citation_publication_date" content="2026"><meta property="og:type" content="website"><meta property="og:title" content="FlowVLA — Research Summary · CoRL 2026"><meta property="og:description" content="Learn 3D motion during training. Keep the original VLA at inference."><link rel="icon" href="../assets/images/favicon.png" type="image/png"><link rel="stylesheet" href="../styles.css?v=16"><script src="../script.js?v=14" defer></script><link rel="canonical" href="https://gnaroshi.dev/mmai-lab/flowvla/abstract/"><meta property="og:url" content="https://gnaroshi.dev/mmai-lab/flowvla/abstract/"><meta property="og:image" content="https://gnaroshi.dev/mmai-lab/flowvla/assets/images/overview.jpg"><meta property="og:image:alt" content="FlowVLA: Pluggable 3D Flow Learning"><meta name="twitter:card" content="summary_large_image"><meta name="citation_pdf_url" content="https://gnaroshi.dev/mmai-lab/flowvla/assets/papers/flowvla-submission.pdf"><link rel="stylesheet" href="summary.css?v=1"></head>
+<body class="summary-page">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header summary-header"><div class="wrap header-inner"><a class="brand" href="https://mmai-laboratory.github.io/" aria-label="MMAI Lab homepage"><img src="../assets/images/mmai-logo.png" width="58" height="58" alt="MMAI Lab"><span>MMAI Lab<small>Ajou University</small></span></a><a class="return-link" href="../">Full project page <span aria-hidden="true">→</span></a></div></header>
+<a class="back-to-top" href="#top" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 12 6-6 6 6M12 6v14M5 3h14"/></svg></a>
+<main id="main">
+<section id="top" tabindex="-1" class="hero wrap" aria-labelledby="title">
+  <p class="venue">CoRL 2026 · Accepted</p>
+  <h1 id="title">Flow<span>VLA</span></h1>
+  <p class="paper-title">Enabling World Dynamics Understanding<br class="title-break"> through Pluggable 3D Flow Learning</p>
+  <div class="authors"><span><a href="https://gojunhyeong.github.io/">Junhyeong Go</a><sup>1</sup></span><span><a href="https://gnaroshi.dev/">Mingyu Jung</a><sup>1</sup></span><span><a href="https://iwbn.github.io/">Woobin Im</a><sup>2</sup></span><span><a href="https://sites.google.com/view/jongbinryu/about-me">Jongbin Ryu</a><sup>1</sup></span></div>
+  <div class="affiliations"><span><sup>1</sup> Ajou University</span><span><sup>2</sup> Samsung Electronics</span></div>
+  <div class="actions"><a class="button primary" href="../assets/papers/flowvla-submission.pdf">Paper ↗</a><a class="button" href="../#overview-player">Full video ▷</a><a class="button" href="#citation">BibTeX</a></div>
+  <p class="hero-summary">Learning to connect 3D scene motion with robot control.</p>
+</section>
+<section id="overview" class="section wrap" tabindex="-1" aria-labelledby="overview-title">
+  <h2 id="overview-title">Overview</h2>
+  <p>Vision-language-action (VLA) models turn images, language instructions, and robot state into actions. Successful manipulation also requires understanding how objects and the robot move together in 3D.</p>
+  <p><strong>FlowVLA</strong> learns from 3D trajectories reconstructed from RGB demonstrations, using future scene-point movement and robot tool movement as supervision. We evaluate it with Seer and π₀.₅ in simulation and on real robots.</p>
+</section>
+<section id="method" class="section wrap" tabindex="-1" aria-labelledby="method-title">
+  <h2 id="method-title">Method</h2>
+  <p>FlowVLA reconstructs 3D point trajectories, aligns them to the robot’s coordinate system, and selects moving points. A point-level head predicts their future displacement; a second head learns to combine these motions into the displacement of the robot’s <strong>tool-center point (TCP)</strong>.</p>
+  <figure class="research-figure "><a class="figure-image" href="../assets/images/method.png" data-figure-title="FlowVLA architecture" data-figure-caption="Point-level and TCP-level motion targets supervise the same action representation." aria-label="Enlarge FlowVLA architecture"><img src="../assets/images/method.png" width="1276" height="690" loading="lazy" alt="FlowVLA reconstructs scene motion and supervises point-level flow and tool-center-point flow during training."></a><figcaption><span class="figure-caption-title">FlowVLA architecture.</span> Point-level and TCP-level motion targets supervise the same action representation.</figcaption></figure>
+  <p class="training-note">The reconstruction model and flow heads are used only during training. Deployment keeps the original VLA inputs and action decoder.</p>
+</section>
+<section id="results" class="section wrap" tabindex="-1" aria-labelledby="results-title">
+  <h2 id="results-title">Selected Results</h2>
+  <p>Representative comparisons with Seer. LIBERO-Long tests long-horizon tasks; LIBERO-Plus tests unseen conditions without additional fine-tuning.</p>
+  <figure class="table-block compact-table summary-table">
+  <figcaption class="table-caption" id="selected-caption"><span class="table-title">Selected results</span> <span class="table-metric">Success rate (%)</span></figcaption>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Selected results"><table class="result-table" aria-labelledby="selected-caption"><thead><tr><th scope="col">Evaluation</th><th scope="col">Seer</th><th scope="col">Seer + FlowVLA</th></tr></thead><tbody><tr><th scope="row">LIBERO-Long</th><td>80.4</td><td class="ours-column">87.8</td></tr><tr><th scope="row">LIBERO-Plus average</th><td>36.1</td><td class="ours-column">41.1</td></tr><tr><th scope="row">Hang Cup</th><td>46.7</td><td class="ours-column">86.7</td></tr></tbody></table></div>
+  <div class="table-footer"><p class="table-provenance"><span>Adapted from</span> <a class="table-source-link" href="../assets/papers/flowvla-submission.pdf#page=6" target="_blank" rel="noopener" aria-label="Paper Tables 1–2, page 6 (opens in a new tab)">Tables 1–2 ↗</a><span>and</span> <a class="table-source-link" href="../assets/papers/flowvla-submission.pdf#page=8" target="_blank" rel="noopener" aria-label="Paper Table 5, page 8 (opens in a new tab)">Table 5 ↗</a></p><p class="table-note">LIBERO-Long: top-three checkpoint average, 20 rollouts per task. Hang Cup: 15 trials per policy.</p></div>
+</figure>
+  <div class="summary-comparison"><h3>Hang Cup</h3><p class="instruction">Pick up the white mug and hang it on the wooden mug rack</p><div class="media-group" data-group-label="Hang Cup comparison"><div class="comparison-pair"><figure class="clip" data-media="hang-cup-baseline">
+  <div class="media-shell" data-title="Hang Cup · Seer">
+    <div class="video-viewport" style="--video-ratio:1.3333333333;--frame-width:100.0000000000%;--crop-width:100.0000000000%;--crop-height:100.0000000000%;--crop-left:0.0000000000%;--crop-top:0.0000000000%"><div class="video-frame"><video class="loop-video" controls muted playsinline preload="none" data-duration="8.75875" width="640" height="480" poster="../assets/posters/ppt-hang-cup-baseline.jpg" aria-label="Hang Cup · Seer" ><source src="../assets/videos/ppt-hang-cup-baseline.mp4" type="video/mp4"></video></div></div>
+  </div>
+  <figcaption><span class="clip-label">Seer<span class='speed'>4× speed</span></span></figcaption>
+</figure><figure class="clip" data-media="hang-cup-ours">
+  <div class="media-shell" data-title="Hang Cup · Seer + FlowVLA">
+    <div class="video-viewport" style="--video-ratio:1.3333333333;--frame-width:100.0000000000%;--crop-width:100.0000000000%;--crop-height:100.0000000000%;--crop-left:0.0000000000%;--crop-top:0.0000000000%"><div class="video-frame"><video class="loop-video" controls muted playsinline preload="none" data-duration="16.558208" width="640" height="480" poster="../assets/posters/ppt-hang-cup-ours.jpg" aria-label="Hang Cup · Seer + FlowVLA" ><source src="../assets/videos/ppt-hang-cup-ours.mp4" type="video/mp4"></video></div></div>
+  </div>
+  <figcaption><span class="clip-label">Seer + FlowVLA<span class='speed'>4× speed</span></span></figcaption>
+</figure></div></div><p class="caption">Individual rollouts of the same instruction. The table reports success across repeated trials.</p></div>
+</section>
+<section id="motion" class="section wrap" tabindex="-1" aria-labelledby="motion-title">
+  <h2 id="motion-title">From Scene Motion to Robot Motion</h2>
+  <p>This Stack Cups example compares the predicted TCP trajectory with recorded end-effector motion, alongside the RGB demonstration.</p>
+  <figure class="clip" data-media="tcp-stack-cups">
+  <div class="media-shell" data-title="Stack Cups">
+    <div class="video-viewport" style="--video-ratio:2.4454148472;--frame-width:100.0000000000%;--crop-width:100.0000000000%;--crop-height:104.8034934498%;--crop-left:0.0000000000%;--crop-top:-2.4017467249%"><div class="video-frame"><video class="loop-video" controls muted playsinline preload="none" data-duration="15.067" width="1120" height="480" poster="../assets/posters/ppt-tcp-stack-cups.jpg" aria-label="Stack Cups" ><source src="../assets/videos/ppt-tcp-stack-cups.mp4" type="video/mp4"></video></div></div>
+  </div>
+  <figcaption><span class="clip-label">Stack Cups<span class='speed'>4× speed</span></span><span class="clip-description">Recorded TCP in black; predicted TCP in red.</span></figcaption>
+</figure>
+</section>
+<div class="wrap full-study"><a href="../">Explore the full project page <span aria-hidden="true">→</span></a><p>All tasks, benchmark tables, ablations, and additional analyses.</p></div>
+<section id="citation" data-outline-target class="section wrap citation" tabindex="-1" aria-labelledby="citation-title"><div class="citation-heading"><h2 id="citation-title">Citation</h2><div class="copy-wrap js-only"><span id="copy-status" role="status" aria-live="polite"></span><button id="copy-citation" class="button" type="button">Copy BibTeX</button></div></div><pre tabindex="0"><code id="bibtex">@inproceedings{go2026flowvla,
+  title     = {FlowVLA: Enabling World Dynamics Understanding
+               through Pluggable 3D Flow Learning},
+  author    = {Junhyeong Go and Mingyu Jung and Woobin Im and Jongbin Ryu},
+  booktitle = {Conference on Robot Learning},
+  year      = {2026},
+  url       = {https://gnaroshi.dev/mmai-lab/flowvla/}
+}</code></pre></section>
+</main>
+<footer><div class="wrap footer-inner"><a href="https://mmai-laboratory.github.io/" aria-label="MMAI Lab homepage"><img src="../assets/images/mmai-logo.png" width="92" height="92" alt="MMAI Lab" loading="lazy"></a><p>FlowVLA · CoRL 2026<br>MMAI Lab · Ajou University</p></div></footer>
+<dialog id="video-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title"></h2><button type="button" id="close-dialog" class="button">Close ×</button></div><div class="media-shell" data-title="Expanded video"><div class="video-viewport"><div class="video-frame"><video id="expanded-video" controls muted playsinline preload="none"></video></div></div></div></dialog>
+<dialog id="figure-dialog" aria-labelledby="figure-dialog-title"><div class="dialog-head"><h2 id="figure-dialog-title"></h2><div class="dialog-actions"><button type="button" id="figure-zoom" class="button" aria-pressed="false">Original size</button><button type="button" id="close-figure" class="button">Close ×</button></div></div><div class="figure-viewer" tabindex="0" aria-label="Enlarged figure"><img id="expanded-figure" alt=""></div><p id="figure-dialog-caption"></p></dialog>
+</body></html>

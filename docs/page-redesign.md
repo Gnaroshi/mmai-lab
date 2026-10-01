@@ -2,7 +2,7 @@
 
 Baseline for this revision: `a6531c664f9da7e0dcabcfa5f9934adb63e7ce9b`.
 
-## Reading order and evidence
+## Full page: reading order and evidence
 
 Overview introduces the manipulation problem and 3D motion learning before the overview video. Method explains the concepts before the architecture, then shows VDPM reconstruction as the source of training targets. Simulation presents LIBERO, LIBERO-Plus, and data efficiency together. Real-world experiments state the robot, observations, training data, and evaluation protocol before the comparison gallery and its table. Setup and task families precede spatial variations, with additional π₀.₅ results closing the experiment section. Analysis follows the performance evidence: ablations, integrated motion selection and aggregation, TCP trajectories across tasks, then point composition. Citation closes the page.
 
@@ -14,13 +14,21 @@ The [collaborator’s page](https://gojunhyeong.github.io/FlowVLA/) supplied ori
 
 Author affiliations distinguish Ajou University and Samsung Electronics. The full Seer LIBERO rows and π₀.₅ real-world results identify their rebuttal source. The 84.8% object-point fraction is measured among the highest-weight 512 points across 100 examples, separate from the single illustrated example.
 
+## Research summary
+
+The [summary route](https://gnaroshi.dev/mmai-lab/flowvla/abstract/) complements the [full page](https://gnaroshi.dev/mmai-lab/flowvla/); it does not replace or hide the detailed study. It follows one short path: overview, conceptual method with the architecture figure, selected results and a Hang Cup comparison, a Stack Cups TCP trajectory, then citation. Header and closing links return to the full study, and the Full video action opens the full page's overview player.
+
+The three-row table compares Seer and Seer + FlowVLA on LIBERO-Long, LIBERO-Plus average, and Hang Cup. Its six values come from the same verified results as the full page. It names the comparison backbone, states the rollout/trial conditions and zero-shot evaluation scope, and links Paper Tables 1–2 and 5. Selecting these examples does not imply that they summarize every benchmark or backbone.
+
+The summary references the same parent assets, stylesheet, and player script. It adds only its HTML and a small summary stylesheet: the paper, method image, two original Hang Cup clips, and original Stack Cups TCP clip are not copied or re-encoded. Author order, affiliations, paper title, venue, and citation stay consistent across both pages. Verify both routes when changing shared styles or controls.
+
 ## Responsive layout and controls
 
 Text, tables, figures, and videos fit inside one 800 px reading column. Three-column result tables use a centered content-sized width, keeping task labels close to the values. Smaller figures retain smaller widths. Figure captions have a shared background and boundary directly attached to their image. Clickable images open an enlargement dialog; redundant enlargement text links are removed. The setup photo shares a compact row with labeled robot, gripper, and camera specifications; the photo scales down at narrow widths.
 
 Table titles use 15 px text on desktop and 14 px on phones; metrics, source labels, and evaluation notes use 13 px. Research figure captions use 14 px on desktop and 13 px on phones. Title, unit, and source remain distinct without reducing evaluation conditions to tiny footnotes.
 
-At 1240 CSS pixels and above, a right-side outline sits outside the reading column. Below that breakpoint, the header menu presents the same section and subsection hierarchy. The current section's subsections expand, and the active destination follows scrolling as well as direct navigation. A back-to-top control appears after scrolling down. Wide benchmark tables scroll internally while retaining row labels. Video pairs stack on phones. Gallery panels share a track and aligned headings; hidden videos are inert and paused. Play/pause, restart, and enlargement use accessible icons and tooltips with 44 px touch targets. Both individual and group timelines remain seekable.
+On the full page at 1240 CSS pixels and above, a right-side outline sits outside the reading column. Below that breakpoint, the header menu presents the same section and subsection hierarchy. The current section's subsections expand, and the active destination follows scrolling as well as direct navigation. Both pages have a back-to-top control that appears after scrolling down. Wide benchmark tables scroll internally while retaining row labels. Video pairs stack on phones. Gallery panels share a track and aligned headings; hidden videos are inert and paused. Play/pause, restart, and enlargement use accessible icons and tooltips with 44 px touch targets. Both individual and group timelines remain seekable.
 
 The 25 included PPT-embedded MP4s are byte-identical to their sources, preserving timing and speed labels. The full submitted overview is separate. Display viewports hide only previously verified blank borders and remain consistent between posters, playback, and enlargement. No clip was cut from the overview.
 
@@ -32,4 +40,4 @@ The compact 800 px reading column and visible result tables are preserved. This 
 
 The outline revision was checked at 320, 390, 768, and 1321 CSS pixels, including scroll tracking, subsection navigation, keyboard and hash navigation, browser history, and back-to-top behavior. The 1239/1240 px breakpoint was also checked: only the applicable navigation surface is visible, with no document-level horizontal overflow. Seven tables retain their original values, all 26 video sources are unchanged, and existing deep links still resolve.
 
-The publication route is unchanged. Revert this revision and publish `main` to restore the baseline. Private research files and inspection reports stay outside the public repository.
+The full page's publication route is unchanged; the summary adds `/flowvla/abstract/`. Revert this revision and publish `main` to restore the baseline. Private research files and inspection reports stay outside the public repository.

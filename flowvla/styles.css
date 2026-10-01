@@ -44,3 +44,6 @@
 @media(max-width:600px){.table-caption{padding:10px 11px;gap:3px 12px}.table-footer{padding:9px 11px 10px}.table-title{font-size:14px}.table-metric,.table-provenance,.table-footer .table-note,.research-figure figcaption{font-size:13px}}
 
 @media(max-width:600px){.benchmark-table th:first-child{min-width:170px;max-width:200px}}
+
+/* The full study also links to the concise overview. */
+.actions{flex-wrap:wrap}

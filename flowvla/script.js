@@ -182,7 +182,7 @@
   $('#close-dialog')?.addEventListener('click', () => dialog.close());
   dialog?.addEventListener('click', e => { if (e.target === dialog) { const r = dialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close(); } });
   dialog?.addEventListener('close', () => {
-    if (expandedSource && expanded.readyState >= 1 && Number.isFinite(expanded.currentTime) && expandedSource.readyState >= 1) expandedSource.currentTime = Math.min(expanded.currentTime, duration(expandedSource));
+    if (expandedSource && expanded.readyState >= 1 && Number.isFinite(expanded.currentTime)) { expandedSource.currentTime = Math.min(expanded.currentTime, duration(expandedSource)); updateVideo(expandedSource); }
     expanded.pause(); expanded.onloadedmetadata = null; expanded.removeAttribute('src'); expanded.load(); opener?.focus({ preventScroll: true }); expandedSource = null;
   });
   $('#copy-citation')?.addEventListener('click', async () => {

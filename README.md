@@ -13,7 +13,7 @@ This repository contains the research project website and its public paper, figu
 
 The 25 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without trimming, transcoding, or speed changes. Static display viewports hide only verified blank border pixels in visualization clips; the underlying files remain unchanged. The complete submitted video appears once as the overview. Task names, instructions, method explanations, and quantitative results follow the paper and explicitly identified rebuttal experiments.
 
-The page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in the main page.
+The page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in Analysis, after the performance results. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
 
 ## Editing and preview
 

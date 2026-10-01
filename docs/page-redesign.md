@@ -1,10 +1,10 @@
 # FlowVLA page structure and media
 
-Baseline for this revision: `9b58fb3015dd74cdf6b206009a2f8e90f78afc92`.
+Baseline for this revision: `a6531c664f9da7e0dcabcfa5f9934adb63e7ce9b`.
 
 ## Reading order and evidence
 
-Overview introduces the manipulation problem and 3D motion learning. Method pairs the architecture with three conceptual explanations. Simulation groups LIBERO, LIBERO-Plus, visible ablations, and data efficiency. Real-world experiments put the baseline comparison gallery immediately before its result table, followed by additional π₀.₅ results, setup and task families, and the variation gallery with its table. Qualitative analysis progresses from RGB reconstruction to integrated motion selection and TCP aggregation, point composition, and trajectories across tasks.
+Overview introduces the manipulation problem and 3D motion learning before the overview video. Method explains the concepts before the architecture, then shows VDPM reconstruction as the source of training targets. Simulation presents LIBERO, LIBERO-Plus, and data efficiency together. Real-world experiments state the robot, observations, training data, and evaluation protocol before the comparison gallery and its table. Setup and task families precede spatial variations, with additional π₀.₅ results closing the experiment section. Analysis follows the performance evidence: ablations, integrated motion selection and aggregation, TCP trajectories across tasks, then point composition. Citation closes the page.
 
 Reconstruction examples share tabs; the integrated four-view visualization replaces the standalone point-selection gallery. Layout variation is part of the variation gallery. All quantitative tables use success rate (%) in the caption, compact rows, consistent precision, and source/evaluation notes. Comparative benchmark methods link to verified original papers and identify venue/year. Ablation begins with the baseline and ends with FlowVLA.
 
@@ -22,8 +22,8 @@ The 25 included PPT-embedded MP4s are byte-identical to their sources, preservin
 
 ## Validation and rollback
 
-Checked all referenced assets, 25 source MP4 hashes, unique anchors, seven tables, 24 real-world percentage cells, citation links, and experiment conditions. Browser inspection at 320, 390, 768, and 1321 CSS pixels found no page overflow. Verified paired playback, group seeking, icon state and accessible labels, video enlargement and focus restoration, and stable task-gallery height.
+Checked all referenced assets, 25 source MP4 hashes, unique anchors, seven tables, 24 real-world percentage cells, citation links, and experiment conditions. The density revision was checked at 320, 390, 768, and 1321 CSS pixels. The reading-order revision also checks moved navigation targets, overview-player focus, and content preservation. Verified paired playback, group seeking, icon state and accessible labels, video enlargement and focus restoration, and stable task-gallery height.
 
-At the same 1321 × 1117 viewport, the page shortened from 18,445 px to approximately 11,459 px (38%). This measures document height with default task selections, not a claim about reading time.
+The compact 800 px reading column and visible result tables are preserved. This revision changes the explanatory order, retains all seven quantitative tables and all 26 video sources, and preserves existing deep links. The Video action now targets the overview player directly.
 
 The publication route is unchanged. Revert this revision and publish `main` to restore the baseline. Private research files and inspection reports stay outside the public repository.

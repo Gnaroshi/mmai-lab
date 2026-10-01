@@ -313,7 +313,7 @@
       previousHeaderLink = currentHeader?.link;
       if (nav?.classList.contains('is-open')) queueNavReveal(nav, previousHeaderLink);
     }
-    if (navLocation) navLocation.textContent = inHero || !currentSection ? 'Sections' : (currentHeaderSection?.link.textContent || currentSection.link.textContent).trim();
+    if (navLocation) navLocation.textContent = inHero || !currentSection ? '1 · Overview' : (currentHeader?.link.dataset.location || currentHeader?.link.textContent || '').trim();
     if (backToTop) {
       const visible = scrollY >= 500;
       backToTop.classList.toggle('is-visible', visible); backToTop.hidden = !visible; backToTop.inert = !visible;
@@ -323,7 +323,7 @@
   const queueNav = () => { if (!navQueued) { navQueued = true; requestAnimationFrame(updateNav); } };
   const followHash = () => { focusHash(); queueNav(); };
   window.addEventListener('scroll', queueNav, { passive: true });
-  window.addEventListener('resize', queueNav);
+  window.addEventListener('resize', () => { if (matchMedia('(min-width: 900px)').matches) closeNav(); queueNav(); });
   window.addEventListener('load', queueNav);
   window.addEventListener('hashchange', followHash);
   window.addEventListener('popstate', followHash);

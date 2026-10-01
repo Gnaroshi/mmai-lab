@@ -17,6 +17,8 @@ The full page introduces the problem and core idea, explains the method conceptu
 
 The summary provides a shorter path through the problem, method, three selected Seer results, a Hang Cup comparison, and a Stack Cups TCP visualization. It preserves the author and citation information and links back to the full study. Its three video sources, method image, paper, and player controls are shared with the full page.
 
+Paper Figure 2 retains both data-efficiency and computational-cost panels, with a shared caption. The training-time comparison excludes offline 3D reconstruction.
+
 Each result table groups its title and metric above the values, with source and evaluation notes below. Paper-derived tables link to the original PDF page; the LIBERO table identifies its added rebuttal rows, and additional π₀.₅ real-world experiments identify the rebuttal as their source.
 
 ## Editing and preview
@@ -38,7 +40,7 @@ python3 tools/serve.py --directory . --port 8765
 
 Then open `http://127.0.0.1:8765/flowvla/` for the full page or `http://127.0.0.1:8765/flowvla/abstract/` for the summary. The preview server supports HTTP byte ranges so original MP4 videos can be scrubbed without downloading the full file. Keep metadata and reported results consistent across both views; summary media references the shared `flowvla/assets/` directory.
 
-On wide screens, the full page's outline sits beside the reading column and follows the current section and subsection. Below 1240 CSS pixels, the same outline appears in the header menu. A back-to-top control provides a return path through each page.
+The full page uses matching section and subsection numbers in its headings and outline. At 900 CSS pixels and above, the outline stays beside the reading column. Smaller screens show a persistent Contents bar with the active subsection and the complete hierarchy in its menu. A back-to-top control provides a return path through each page.
 
 ## Deployment
 

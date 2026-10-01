@@ -1,6 +1,6 @@
 # FlowVLA page structure and media
 
-Baseline for this revision: `a6531c664f9da7e0dcabcfa5f9934adb63e7ce9b`.
+Baseline for the numbering and figure-restoration revision: `70530c6d8ad1f9d1a19a0a9dc055e885df8dbcf6`.
 
 ## Full page: reading order and evidence
 
@@ -13,6 +13,8 @@ Each table forms one bordered figure: a distinct title and metric at the top, va
 The [collaborator’s page](https://gojunhyeong.github.io/FlowVLA/) supplied original research images, checked against the submitted paper and rebuttal. Its `fig9_vdpm_fruit` and `fig10_vdpm_libero` correspond to paper Figures 8 and 9. Composition is from the rebuttal. The robot setup uses the native, unscaled JPEG embedded in the paper; the PDF placement had stretched it horizontally. Seven task-image tiles preserve their source proportions and place each category heading once above its group.
 
 Author affiliations distinguish Ajou University and Samsung Electronics. The full Seer LIBERO rows and π₀.₅ real-world results identify their rebuttal source. The 84.8% object-point fraction is measured among the highest-weight 512 points across 100 examples, separate from the single illustrated example.
+
+Paper Figure 2 restores the original 843×400 image with both panels: training data efficiency and training/inference cost. CSS arranges its two original panels side by side or stacks them on phones; enlargement opens the complete original figure. One shared caption identifies Seer on LIBERO-Long. The nearby note distinguishes policy training time from offline 3D reconstruction. Cost is presented as an experimental tradeoff, with no promotional badges.
 
 ## Research summary
 
@@ -28,7 +30,7 @@ Text, tables, figures, and videos fit inside one 800 px reading column. Three-co
 
 Table titles use 15 px text on desktop and 14 px on phones; metrics, source labels, and evaluation notes use 13 px. Research figure captions use 14 px on desktop and 13 px on phones. Title, unit, and source remain distinct without reducing evaluation conditions to tiny footnotes.
 
-On the full page at 1240 CSS pixels and above, a right-side outline sits outside the reading column. Below that breakpoint, the header menu presents the same section and subsection hierarchy. The current section's subsections expand, and the active destination follows scrolling as well as direct navigation. Both pages have a back-to-top control that appears after scrolling down. Wide benchmark tables scroll internally while retaining row labels. Video pairs stack on phones. Gallery panels share a track and aligned headings; hidden videos are inert and paused. Play/pause, restart, and enlargement use accessible icons and tooltips with 44 px touch targets. Both individual and group timelines remain seekable.
+The full page numbers sections 1–6 and subsections 2-a through 5-d, using the same identifiers in the headings and both navigation surfaces. At 900 CSS pixels and above, a right-side outline sits outside a fluid reading column capped at 800 px. Below that breakpoint, a persistent Contents bar displays the active subsection and opens the complete hierarchy. The desktop outline expands the current section’s children; scrolling, direct links, and keyboard navigation update the active destination. Both pages have a back-to-top control that appears after scrolling down. Wide benchmark tables scroll internally while retaining row labels. Video pairs stack on phones. Gallery panels share a track and aligned headings; hidden videos are inert and paused. Play/pause, restart, and enlargement use accessible icons and tooltips with 44 px touch targets. Both individual and group timelines remain seekable.
 
 The 25 included PPT-embedded MP4s are byte-identical to their sources, preserving timing and speed labels. The full submitted overview is separate. Display viewports hide only previously verified blank borders and remain consistent between posters, playback, and enlargement. No clip was cut from the overview.
 
@@ -38,6 +40,6 @@ Checked all referenced assets, 25 source MP4 hashes, unique anchors, seven table
 
 The compact 800 px reading column and visible result tables are preserved. This revision changes the explanatory order, retains all seven quantitative tables and all 26 video sources, and preserves existing deep links. The Video action now targets the overview player directly.
 
-The outline revision was checked at 320, 390, 768, and 1321 CSS pixels, including scroll tracking, subsection navigation, keyboard and hash navigation, browser history, and back-to-top behavior. The 1239/1240 px breakpoint was also checked: only the applicable navigation surface is visible, with no document-level horizontal overflow. Seven tables retain their original values, all 26 video sources are unchanged, and existing deep links still resolve.
+The numbered outline revision was checked at 320, 390, 768, and 931 CSS pixels, including current-subsection display, keyboard and hash navigation, history, and menu dismissal. The 931 px view retains the side outline with no document-level horizontal overflow. Narrow menus reveal the current item when opened. Seven tables retain their original values, all 26 video sources are unchanged, and existing deep links still resolve.
 
 The full page's publication route is unchanged; the summary adds `/flowvla/abstract/`. Revert this revision and publish `main` to restore the baseline. Private research files and inspection reports stay outside the public repository.

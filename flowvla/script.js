@@ -8,7 +8,7 @@
   let opener = null, expandedSource = null;
   const duration = v => Number.isFinite(v.duration) ? v.duration : Number(v.dataset.duration) || 0;
   const format = n => Number.isFinite(n) ? `${Math.floor(Math.max(0, n) / 60)}:${String(Math.floor(Math.max(0, n) % 60)).padStart(2, '0')}` : '--:--';
-  const available = v => !v.closest('[hidden]') && !document.hidden && (v === expanded ? dialog?.open : !dialog?.open);
+  const available = v => !$('#figure-dialog')?.open && !v.closest('[hidden]') && !document.hidden && (v === expanded ? dialog?.open : !dialog?.open);
   const node = (tag, className, text) => { const n = document.createElement(tag); n.className = className; if (text) n.textContent = text; return n; };
   const button = (cls, text, label) => { const b = node('button', cls, text); b.type = 'button'; b.setAttribute('aria-label', label || text); return b; };
   function toolbar(prefix, title, grouped = false) {
@@ -190,6 +190,27 @@
     try { await navigator.clipboard.writeText(text); status.textContent = 'Citation copied.'; }
     catch (_) { const selection = getSelection(), range = document.createRange(); range.selectNodeContents($('#bibtex')); selection.removeAllRanges(); selection.addRange(range); status.textContent = 'Select and copy the citation below.'; }
   });
+  const navToggle = $('.nav-toggle'), nav = $('.main-nav');
+  const closeNav = () => { nav?.classList.remove('is-open'); navToggle?.setAttribute('aria-expanded', 'false'); };
+  navToggle?.addEventListener('click', () => { const open = nav.classList.toggle('is-open'); navToggle.setAttribute('aria-expanded', String(open)); });
+  $$('.main-nav a').forEach(a => a.addEventListener('click', closeNav));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && nav?.classList.contains('is-open')) { closeNav(); navToggle.focus(); } });
+  document.addEventListener('click', e => { if (!e.target.closest('.site-header')) closeNav(); });
+  const figureDialog = $('#figure-dialog'), figureViewer = $('.figure-viewer'), figureImage = $('#expanded-figure'), figureZoom = $('#figure-zoom');
+  let figureOpener;
+  $$('[data-figure-title]').forEach(link => link.addEventListener('click', e => {
+    if (!figureDialog || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault(); figureOpener = link; groups.forEach(pauseGroup); videos.forEach(pauseOne);
+    $('#figure-dialog-title').textContent = link.dataset.figureTitle;
+    $('#figure-dialog-caption').textContent = link.dataset.figureCaption;
+    figureImage.src = link.href; figureImage.alt = link.dataset.figureTitle;
+    figureViewer.classList.remove('is-original'); figureZoom.setAttribute('aria-pressed', 'false'); figureZoom.textContent = 'Original size';
+    figureDialog.showModal(); figureViewer.scrollLeft = 0; figureViewer.scrollTop = 0;
+  }));
+  figureZoom?.addEventListener('click', () => { const original = figureViewer.classList.toggle('is-original'); figureZoom.setAttribute('aria-pressed', String(original)); figureZoom.textContent = original ? 'Fit to screen' : 'Original size'; });
+  $('#close-figure')?.addEventListener('click', () => figureDialog.close());
+  figureDialog?.addEventListener('click', e => { if (e.target === figureDialog) { const r = figureDialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) figureDialog.close(); } });
+  figureDialog?.addEventListener('close', () => figureOpener?.focus({ preventScroll: true }));
   const links = $$('.main-nav a[href^="#"]').filter(a => a.hash.length > 1 && document.getElementById(a.hash.slice(1)));
   const focusHash = () => {
     if (location.hash.length < 2) return; let target;

@@ -10,15 +10,40 @@
   const format = n => Number.isFinite(n) ? `${Math.floor(Math.max(0, n) / 60)}:${String(Math.floor(Math.max(0, n) % 60)).padStart(2, '0')}` : '--:--';
   const available = v => !$('#figure-dialog')?.open && !v.closest('[hidden]') && !document.hidden && (v === expanded ? dialog?.open : !dialog?.open);
   const node = (tag, className, text) => { const n = document.createElement(tag); n.className = className; if (text) n.textContent = text; return n; };
-  const button = (cls, text, label) => { const b = node('button', cls, text); b.type = 'button'; b.setAttribute('aria-label', label || text); return b; };
+  const iconPaths = {
+    play: '<path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none"/>',
+    pause: '<path d="M8 5v14M16 5v14" stroke-width="4"/>',
+    restart: '<path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6"/>',
+    expand: '<path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/>',
+    loading: '<circle cx="12" cy="12" r="8" opacity=".2"/><path d="M12 4a8 8 0 0 1 8 8"/>'
+  };
+  const labelButton = (b, label) => { b.setAttribute('aria-label', label); b.title = label; };
+  function buttonState(b, state, label) {
+    labelButton(b, label);
+    if (b.dataset.state === state) return;
+    b.dataset.state = state;
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttribute('class', `control-icon${state === 'loading' ? ' control-icon--loading' : ''}`);
+    icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('width', '20'); icon.setAttribute('height', '20');
+    icon.setAttribute('fill', 'none'); icon.setAttribute('stroke', 'currentColor'); icon.setAttribute('stroke-width', '1.8');
+    icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round');
+    icon.setAttribute('aria-hidden', 'true'); icon.setAttribute('focusable', 'false'); icon.innerHTML = iconPaths[state];
+    const previous = $('.control-icon', b); if (previous) previous.replaceWith(icon); else b.prepend(icon);
+  }
+  const button = (cls, state, label, grouped = false) => {
+    const b = node('button', `${cls} control-button`); b.type = 'button'; buttonState(b, state, label);
+    if (grouped) { const scope = node('span', 'control-scope', 'All'); scope.setAttribute('aria-hidden', 'true'); b.append(scope); }
+    return b;
+  };
   function toolbar(prefix, title, grouped = false) {
     const bar = node('div', `${prefix}-controls`); bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', `${title} controls`);
     if (grouped) bar.append(node('span', 'group-label', title));
-    const play = button(`${prefix}-play`, grouped ? 'Play together' : 'Play', `Play ${title}`);
+    const scope = grouped ? `all videos in ${title}` : title;
+    const play = button(`${prefix}-play`, 'play', `Play ${scope}`, grouped);
     const seek = node('input', `${prefix}-seek`); seek.type = 'range'; seek.min = 0; seek.max = 1000; seek.step = 1; seek.value = 0; seek.setAttribute('aria-label', `Seek ${title}`);
     const time = node('output', `${prefix}-time`, '0:00 / --:--');
-    const restart = button(`${prefix}-restart`, grouped ? 'Restart together' : 'Restart', `Restart ${title} from the beginning`);
-    const enlarge = grouped ? null : button('player-expand', 'Enlarge', `Enlarge ${title}`);
+    const restart = button(`${prefix}-restart`, 'restart', `Restart ${scope} from the beginning`, grouped);
+    const enlarge = grouped ? null : button('player-expand', 'expand', `Enlarge ${title}`);
     const status = node('span', `${prefix}-status`); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
     bar.append(play, seek, time, restart); if (enlarge) bar.append(enlarge); bar.append(status);
     return { bar, play, seek, time, restart, enlarge, status };
@@ -26,7 +51,7 @@
   const status = (ui, text, loading = false) => { ui.status.textContent = text; ui.status.dataset.loading = String(loading); ui.bar.setAttribute('aria-busy', String(loading)); };
   function updateVideo(v) {
     const s = states.get(v), d = duration(v), playing = !v.paused || s.pending;
-    s.ui.play.textContent = s.pending ? 'Loading…' : playing ? 'Pause' : 'Play'; s.ui.play.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${s.title}`);
+    buttonState(s.ui.play, s.pending ? 'loading' : playing ? 'pause' : 'play', `${s.pending ? 'Cancel loading' : playing ? 'Pause' : 'Play'} ${s.title}`);
     if (!s.seeking) s.ui.seek.value = d ? Math.min(1000, v.currentTime / d * 1000) : 0;
     s.ui.time.textContent = `${format(v.currentTime)} / ${d ? format(d) : '--:--'}`;
     s.ui.seek.setAttribute('aria-valuetext', `${format(v.currentTime)} of ${d ? format(d) : 'unknown duration'}`);
@@ -36,8 +61,7 @@
   function updateGroup(g) {
     const d = groupDuration(g), active = groupPlaying(g);
     if (g.coordinated && g.running) g.time = g.master.currentTime;
-    g.ui.play.textContent = g.pending ? 'Loading…' : active ? 'Pause together' : 'Play together';
-    g.ui.play.setAttribute('aria-label', `${active ? 'Pause' : 'Play'} ${g.label} together`);
+    buttonState(g.ui.play, g.pending ? 'loading' : active ? 'pause' : 'play', `${g.pending ? 'Cancel loading' : active ? 'Pause' : 'Play'} all videos in ${g.label}`);
     if (!g.seeking) g.ui.seek.value = d ? Math.min(1000, g.time / d * 1000) : 0;
     g.ui.time.textContent = `${format(g.time)} / ${d ? format(d) : '--:--'}`;
     g.ui.seek.setAttribute('aria-valuetext', `${format(g.time)} of ${d ? format(d) : 'unknown duration'}`);
@@ -96,7 +120,7 @@
       }
       await Promise.all(active.map(v => v.play()));
       if (token === g.token) { g.running = true; status(g.ui, ''); }
-    } catch (_) { if (token === g.token) { g.videos.forEach(v => v.pause()); status(g.ui, 'Unable to play. Press Play together to retry.'); } }
+    } catch (_) { if (token === g.token) { g.videos.forEach(v => v.pause()); status(g.ui, 'Unable to play. Use the play button marked All to retry.'); } }
     finally { if (token === g.token) { g.pending = false; updateGroup(g); } }
   }
   async function seekGroup(g, ratio) {
@@ -135,8 +159,9 @@
       const expandedState = states.get(expanded);
       expandedState.title = title; expanded.dataset.duration = duration(v); expanded.poster = v.poster;
       expanded.controls = false; expanded.setAttribute('aria-label', title);
+      expandedState.ui.bar.setAttribute('aria-label', `${title} controls`);
       expandedState.ui.seek.setAttribute('aria-label', `Seek enlarged ${title}`);
-      expandedState.ui.restart.setAttribute('aria-label', `Restart enlarged ${title} from the beginning`);
+      labelButton(expandedState.ui.restart, `Restart enlarged ${title} from the beginning`);
       updateVideo(expanded);
       expanded.onloadedmetadata = () => { expanded.currentTime = Math.min(position, expanded.duration); };
       expanded.src = v.currentSrc || $('source', v)?.getAttribute('src') || v.getAttribute('src'); expanded.preload = 'auto'; expanded.load(); dialog.showModal();

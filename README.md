@@ -7,7 +7,7 @@ Junhyeong Go¹, Mingyu Jung¹, Woobin Im², and Jongbin Ryu¹
 
 ¹Ajou University · ²Samsung Electronics
 
-[Research summary](https://gnaroshi.dev/mmai-lab/flowvla/abstract/) · [Full project page](https://gnaroshi.dev/mmai-lab/flowvla/)
+[Project page](https://gnaroshi.dev/mmai-lab/flowvla/) · [Detailed results](https://gnaroshi.dev/mmai-lab/flowvla/full/)
 
 This repository contains the research project website and its public paper, figures, and demonstration videos. It does not contain the model implementation or training code.
 
@@ -15,7 +15,7 @@ The 25 individual demonstration and visualization videos are the original MP4 fi
 
 The full page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in Analysis, after the performance results. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
 
-The summary provides a shorter path through the problem, method, three selected Seer results, a Hang Cup comparison, and a Stack Cups TCP visualization. It preserves the author and citation information and links back to the full study. Its three video sources, method image, paper, and player controls are shared with the full page.
+The default page follows a concise path through the problem, method, the complete 12-row LIBERO comparison, a Hang Cup example, and a Stack Cups TCP visualization. It retains both evaluated backbones and all four LIBERO suites, with source and evaluation notes. LIBERO-Plus has a brief result statement and a link to its detailed table. The detailed page preserves all seven tables and 26 video sources. Both routes share original assets, controls, metadata, and citation information.
 
 Paper Figure 2 retains both data-efficiency and computational-cost panels, with a shared caption. The training-time comparison excludes offline 3D reconstruction.
 
@@ -25,9 +25,11 @@ Each result table groups its title and metric above the values, with source and 
 
 The site uses plain HTML, CSS, and JavaScript; no build step is required.
 
-- `flowvla/index.html`: page content and metadata
-- `flowvla/abstract/index.html`: concise research summary
-- `flowvla/abstract/summary.css`: summary-specific spacing and layout
+- `flowvla/index.html`: concise default page and complete main comparison table
+- `flowvla/full/index.html`: detailed experiments and analysis
+- `flowvla/abstract/index.html`: compatibility redirect to the default page
+- `flowvla/summary.css`: default-page spacing and layout
+- `flowvla/legacy-links.js`: old detailed anchors redirected to their preserved route
 - `flowvla/styles.css`: layout and typography
 - `flowvla/script.js`: seekable video players, group playback, task galleries, current-position outline, and figure enlargement
 - `flowvla/assets/`: published paper, images, and videos
@@ -38,9 +40,9 @@ From the repository root, run:
 python3 tools/serve.py --directory . --port 8765
 ```
 
-Then open `http://127.0.0.1:8765/flowvla/` for the full page or `http://127.0.0.1:8765/flowvla/abstract/` for the summary. The preview server supports HTTP byte ranges so original MP4 videos can be scrubbed without downloading the full file. Keep metadata and reported results consistent across both views; summary media references the shared `flowvla/assets/` directory.
+Then open `http://127.0.0.1:8765/flowvla/` for the default page or `http://127.0.0.1:8765/flowvla/full/` for the detailed page. The preview server supports HTTP byte ranges so original MP4 videos can be scrubbed without downloading the full file. Keep metadata and reported results consistent across both views; both reference the shared `flowvla/assets/` directory. The historical `/abstract/` route redirects to the default page and preserves its query and hash. Known old detail-only hashes at the root redirect to `/full/`; shared anchors stay on the default page.
 
-The full page uses matching section and subsection numbers in its headings and outline. At 900 CSS pixels and above, the outline stays beside the reading column. Smaller screens show a persistent Contents bar with the active subsection and the complete hierarchy in its menu. A back-to-top control provides a return path through each page.
+Both pages use matching section and subsection numbers in its headings and outline. At 900 CSS pixels and above, the outline stays beside the reading column. Smaller screens show a persistent Contents bar with the active subsection and the complete hierarchy in its menu. A back-to-top control provides a return path through each page.
 
 ## Deployment
 

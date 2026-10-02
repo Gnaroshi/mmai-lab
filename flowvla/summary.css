@@ -1,0 +1,30 @@
+/* A short reading path; controls and research assets match the full page. */
+.summary-page .hero{padding-top:30px;padding-bottom:30px}
+.summary-page .hero-summary{max-width:640px}
+.summary-header .return-link{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:550;white-space:nowrap}
+.summary-page .section{padding:28px 0;border-top:1px solid var(--line)}
+.summary-page .section>h2{margin-bottom:14px}
+.summary-page .section>p+p{margin-top:12px}
+.summary-page .section h2{font-size:28px}
+.summary-page .research-figure{margin-top:18px}
+.summary-page .training-note{margin-top:14px;color:var(--muted);font-size:15px;line-height:1.6}
+.robustness-result{margin-top:16px;font-size:16px}
+.summary-page .table-block{margin-top:18px}
+.summary-comparison{margin-top:24px}
+.summary-comparison h3{font-size:21px;text-align:center}
+.summary-comparison>.instruction{text-align:center;margin:6px 0 14px}
+.summary-comparison>.caption{margin-top:9px}
+#motion>.clip{margin-top:18px}
+.full-study{padding:18px 0 26px}
+.full-study>a{font-size:17px;font-weight:600}
+.full-study>p{margin-top:3px;color:var(--muted);font-size:14px}
+.summary-page .citation{padding-bottom:30px}
+@media(max-width:600px){
+  .summary-page .hero{padding-top:24px;padding-bottom:24px}
+  .summary-header .header-inner{gap:12px}
+  .summary-header .return-link{font-size:13px;gap:5px}
+  .summary-page .section{padding:24px 0}
+  .summary-page .section h2{font-size:25px}
+  .summary-page .training-note{font-size:14px}
+  .summary-page .full-study{padding-bottom:24px}
+}

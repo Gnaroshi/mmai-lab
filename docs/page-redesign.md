@@ -16,13 +16,13 @@ Author affiliations distinguish Ajou University and Samsung Electronics. The ful
 
 Paper Figure 2 restores the original 843×400 image with both panels: training data efficiency and training/inference cost. CSS arranges its two original panels side by side or stacks them on phones; enlargement opens the complete original figure. One shared caption identifies Seer on LIBERO-Long. The nearby note distinguishes policy training time from offline 3D reconstruction. Cost is presented as an experimental tradeoff, with no promotional badges.
 
-## Research summary
+## Default page and detailed results
 
-The [summary route](https://gnaroshi.dev/mmai-lab/flowvla/abstract/) complements the [full page](https://gnaroshi.dev/mmai-lab/flowvla/); it does not replace or hide the detailed study. It follows one short path: overview, conceptual method with the architecture figure, selected results and a Hang Cup comparison, a Stack Cups TCP trajectory, then citation. Header and closing links return to the full study, and the Full video action opens the full page's overview player.
+The concise project page is the default `/flowvla/` route. The complete study lives at `/flowvla/full/`. The default preserves the complete LIBERO main comparison: 12 rows, all four task suites and Average, and both Seer and π₀.₅ variants. It uses the same verified table as the detailed page, including the explicit rebuttal provenance for Seer's full-suite rows. A three-row selected-results table no longer substitutes for the main comparison.
 
-The three-row table compares Seer and Seer + FlowVLA on LIBERO-Long, LIBERO-Plus average, and Hang Cup. Its six values come from the same verified results as the full page. It names the comparison backbone, states the rollout/trial conditions and zero-shot evaluation scope, and links Paper Tables 1–2 and 5. Selecting these examples does not imply that they summarize every benchmark or backbone.
+The default path is overview, method and architecture, main comparison, representative Hang Cup behavior, Stack Cups TCP trajectory, then citation. LIBERO-Plus remains a concise zero-shot result statement for both backbones with a direct link to its full table. Hang Cup explicitly reports 7/15 versus 13/15 from Paper Table 5; the two displayed rollouts are illustrative rather than aggregate evidence. The two pages share original assets and controls, and each retains a numbered current-location outline.
 
-The summary references the same parent assets, stylesheet, and player script. It adds only its HTML and a small summary stylesheet: the paper, method image, two original Hang Cup clips, and original Stack Cups TCP clip are not copied or re-encoded. Author order, affiliations, paper title, venue, and citation stay consistent across both pages. Verify both routes when changing shared styles or controls.
+The former `/abstract/` route uses `location.replace` with query and hash preservation to reach the new default. Known anchors present only in the former full landing page redirect from the root to `/full/`, both on initial load and hash changes. Shared anchors such as `overview`, `method`, `libero`, and `citation` stay on the default. Unknown and malformed hashes are left alone. Relative paper, video, image, and stylesheet URLs resolve to the shared parent directory from `/full/`. Canonical and Open Graph URLs identify each route; BibTeX retains the canonical project root.
 
 ## Responsive layout and controls
 
@@ -42,4 +42,10 @@ The compact 800 px reading column and visible result tables are preserved. This 
 
 The numbered outline revision was checked at 320, 390, 768, and 931 CSS pixels, including current-subsection display, keyboard and hash navigation, history, and menu dismissal. The 931 px view retains the side outline with no document-level horizontal overflow. Narrow menus reveal the current item when opened. Seven tables retain their original values, all 26 video sources are unchanged, and existing deep links still resolve.
 
-The full page's publication route is unchanged; the summary adds `/flowvla/abstract/`. Revert this revision and publish `main` to restore the baseline. Private research files and inspection reports stay outside the public repository.
+## Default-route migration (2026-10-02)
+
+Baseline: `8e350e78fc3891aa6c62f5b9ce2bf29d2b973012` on `main`. The route migration is published atomically with the concise default, the complete detailed page, and both compatibility paths. No user action or data migration is required. The detailed page retains all seven table contents and all 26 media sources; the default contains the complete 12-row main table and its three original video sources.
+
+Applied guidance: shared canonical evidence, preservation of main comparison evidence in concise views, responsive tables and current-location navigation, stable deep-link compatibility. Existing GitHub Pages hosting and approved visual styling are retained. Unrelated application/distribution rules do not apply to this static site.
+
+Validation covers static asset/fragment resolution, exact detailed table/media preservation, initial and same-document legacy hashes, query/hash preservation through `/abstract/`, route canonical metadata, mobile internal table scrolling, and 320/768/1280 CSS-pixel layouts. Revert this revision and publish `main` to restore the previous root/full-summary routing; original assets and result data are unchanged. Private research files and inspection reports stay outside the public repository.

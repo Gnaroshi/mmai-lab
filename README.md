@@ -11,11 +11,11 @@ Junhyeong Go¹, Mingyu Jung¹, Woobin Im², and Jongbin Ryu¹
 
 This repository contains the research project website and its public paper, figures, and demonstration videos. It does not contain the model implementation or training code.
 
-The 25 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without trimming, transcoding, or speed changes. Static display viewports hide only verified blank border pixels in visualization clips; the underlying files remain unchanged. The complete submitted video appears once as the overview. Task names, instructions, method explanations, and quantitative results follow the paper and explicitly identified rebuttal experiments.
+The 25 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without trimming, transcoding, or speed changes. Static display viewports hide only verified blank border pixels in visualization clips; the underlying files remain unchanged. The detailed page retains the complete submitted overview. The default page uses a lossless version with only its opening 343 slide removed (74 frames, 3.086417 seconds); all remaining frames, resolution, and playback speed are preserved. Task names, instructions, method explanations, and quantitative results follow the paper and explicitly identified rebuttal experiments.
 
 The full page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in Analysis, after the performance results. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
 
-The default page follows a concise path through the problem, method, the complete 12-row LIBERO comparison, a Hang Cup example, and a Stack Cups TCP visualization. It retains both evaluated backbones and all four LIBERO suites, with source and evaluation notes. LIBERO-Plus has a brief result statement and a link to its detailed table. The detailed page preserves all seven tables and 26 video sources. Both routes share original assets, controls, metadata, and citation information.
+The default page follows the overview video → Abstract → Method → real-world demos → simulation and real-world results. Six original Seer + FlowVLA rollouts are visible in a desktop 3-column gallery, including one camera-viewpoint variation. Results retain the complete 12-row LIBERO table and the seven-task real-world table, with source and evaluation notes. LIBERO-Plus has a brief result statement and a link to its detailed table. The detailed page preserves all seven tables and 26 video sources. Both routes share verified data, controls, metadata, and citation information.
 
 Paper Figure 2 retains both data-efficiency and computational-cost panels, with a shared caption. The training-time comparison excludes offline 3D reconstruction.
 
@@ -25,7 +25,7 @@ Each result table groups its title and metric above the values, with source and 
 
 The site uses plain HTML, CSS, and JavaScript; no build step is required.
 
-- `flowvla/index.html`: concise default page and complete main comparison table
+- `flowvla/index.html`: video-first default page, six demos, and main simulation/real-world comparison tables
 - `flowvla/full/index.html`: detailed experiments and analysis
 - `flowvla/abstract/index.html`: compatibility redirect to the default page
 - `flowvla/summary.css`: default-page spacing and layout
@@ -42,7 +42,7 @@ python3 tools/serve.py --directory . --port 8765
 
 Then open `http://127.0.0.1:8765/flowvla/` for the default page or `http://127.0.0.1:8765/flowvla/full/` for the detailed page. The preview server supports HTTP byte ranges so original MP4 videos can be scrubbed without downloading the full file. Keep metadata and reported results consistent across both views; both reference the shared `flowvla/assets/` directory. The historical `/abstract/` route redirects to the default page and preserves its query and hash. Known old detail-only hashes at the root redirect to `/full/`; shared anchors stay on the default page.
 
-Both pages use matching section and subsection numbers in its headings and outline. At 900 CSS pixels and above, the outline stays beside the reading column. Smaller screens show a persistent Contents bar with the active subsection and the complete hierarchy in its menu. A back-to-top control provides a return path through each page.
+Both pages use matching section and subsection numbers in their headings and outline. The default gallery uses three columns at 1100 CSS pixels and above, two columns from 600–1099 px, and one column below 600 px. Narrow video cards reflow controls without reducing the 44 px touch targets. At 900 CSS pixels and above, the outline stays beside the reading column. Smaller screens show a persistent Contents bar with the active subsection and the complete hierarchy in its menu. A back-to-top control provides a return path through each page.
 
 ## Deployment
 

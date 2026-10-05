@@ -4,7 +4,7 @@
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
   const videos = [...new Set($$('.media-shell video, #overview-video'))];
   const states = new WeakMap(), membership = new WeakMap();
-  const groups = [], dialog = $('#video-dialog'), expanded = $('#expanded-video');
+  const groups = [], dialog = $('#video-dialog'), expanded = $('#expanded-video'), dialogContext = $('#dialog-context');
   let opener = null, expandedSource = null;
   const duration = v => Number.isFinite(v.duration) ? v.duration : Number(v.dataset.duration) || 0;
   const format = n => Number.isFinite(n) ? `${Math.floor(Math.max(0, n) / 60)}:${String(Math.floor(Math.max(0, n) % 60)).padStart(2, '0')}` : '--:--';
@@ -55,6 +55,11 @@
     if (!s.seeking) s.ui.seek.value = d ? Math.min(1000, v.currentTime / d * 1000) : 0;
     s.ui.time.textContent = `${format(v.currentTime)} / ${d ? format(d) : '--:--'}`;
     s.ui.seek.setAttribute('aria-valuetext', `${format(v.currentTime)} of ${d ? format(d) : 'unknown duration'}`);
+    if (s.start) {
+      const hidden = !v.paused || v.currentTime > 0 || s.pending;
+      if (hidden && document.activeElement === s.start) s.ui.play.focus({ preventScroll: true });
+      s.start.hidden = hidden;
+    }
   }
   const groupDuration = g => Math.max(0, ...g.videos.map(duration));
   const groupPlaying = g => g.pending || g.videos.some(v => !v.paused);
@@ -139,10 +144,12 @@
   }
   videos.forEach(v => {
     const shell = v.closest('.media-shell') || v.parentElement, title = shell.dataset.title || v.getAttribute('aria-label') || 'video';
-    const ui = toolbar('player', title), s = { ui, title, token: 0, pending: false, seeking: false };
+    const ui = toolbar('player', title), s = { ui, title, start: $('.overview-start', shell), token: 0, pending: false, seeking: false };
     states.set(v, s); v.controls = false; v.autoplay = false; v.removeAttribute('autoplay'); v.loop = false; v.playsInline = true;
     shell.append(ui.bar);
-    ui.play.addEventListener('click', () => { if (!v.paused || s.pending) { independent(v); pauseOne(v); } else playOne(v); });
+    const togglePlayback = () => { if (!v.paused || s.pending) { independent(v); pauseOne(v); } else playOne(v); };
+    ui.play.addEventListener('click', togglePlayback);
+    s.start?.addEventListener('click', togglePlayback);
     ui.restart.addEventListener('click', () => playOne(v, true));
     wireSeek(ui, s, ratio => seekOne(v, ratio), () => !v.paused || s.pending, () => playOne(v));
     ['loadedmetadata', 'durationchange', 'timeupdate', 'play', 'pause', 'ended', 'seeked'].forEach(event => v.addEventListener(event, () => { updateVideo(v); const g = membership.get(v); if (g) updateGroup(g); }));
@@ -152,6 +159,14 @@
       if (!dialog || !expanded) return;
       opener = ui.enlarge; expandedSource = v; groups.forEach(pauseGroup); videos.forEach(pauseOne);
       $('#dialog-title').textContent = title; expanded.muted = v.muted; expanded.volume = v.volume; expanded.loop = false;
+      if (dialogContext) {
+        const clip = v.closest('.clip'), panel = v.closest('.gallery-panel'), gallery = v.closest('.media-gallery');
+        const instruction = panel ? $('.instruction', panel) : gallery ? $('.instruction', gallery) : null;
+        const details = [clip && $('.clip-description', clip)?.textContent, instruction?.textContent, clip && $('.speed', clip)?.textContent]
+          .map(text => (text || '').trim()).filter((text, index, parts) => text && text !== title && parts.indexOf(text) === index);
+        dialogContext.textContent = v.dataset.context?.trim() || details.join(' · ');
+        dialogContext.hidden = !dialogContext.textContent;
+      }
       const position = v.currentTime;
       const viewport = v.closest('.video-viewport');
       expanded.closest('.video-viewport').setAttribute('style', viewport?.getAttribute('style') || '');
@@ -209,6 +224,25 @@
   dialog?.addEventListener('close', () => {
     if (expandedSource && expanded.readyState >= 1 && Number.isFinite(expanded.currentTime)) { expandedSource.currentTime = Math.min(expanded.currentTime, duration(expandedSource)); updateVideo(expandedSource); }
     expanded.pause(); expanded.onloadedmetadata = null; expanded.removeAttribute('src'); expanded.load(); opener?.focus({ preventScroll: true }); expandedSource = null;
+    if (dialogContext) { dialogContext.textContent = ''; dialogContext.hidden = true; }
+  });
+  $$('.table-block > .table-scroll:not(.performance-scroll)').forEach((scroll, index) => {
+    const hint = node('p', 'table-scroll-hint', 'Scroll to view all columns ↔');
+    hint.id = `table-scroll-hint-${index + 1}`; hint.hidden = true; scroll.before(hint);
+    const updateScroll = () => {
+      const overflow = scroll.scrollWidth > scroll.clientWidth + 1;
+      hint.hidden = !overflow;
+      scroll.classList.toggle('has-overflow', overflow);
+      scroll.classList.toggle('can-scroll-left', overflow && scroll.scrollLeft > 1);
+      scroll.classList.toggle('can-scroll-right', overflow && scroll.scrollLeft + scroll.clientWidth < scroll.scrollWidth - 1);
+      const descriptions = (scroll.getAttribute('aria-describedby') || '').split(/\s+/).filter(id => id && id !== hint.id);
+      if (overflow) descriptions.push(hint.id);
+      if (descriptions.length) scroll.setAttribute('aria-describedby', descriptions.join(' '));
+      else scroll.removeAttribute('aria-describedby');
+    };
+    const resize = new ResizeObserver(updateScroll); resize.observe(scroll);
+    if (scroll.firstElementChild) resize.observe(scroll.firstElementChild);
+    scroll.addEventListener('scroll', updateScroll, { passive: true }); updateScroll();
   });
   $('#copy-citation')?.addEventListener('click', async () => {
     const text = $('#bibtex').textContent.trim(), status = $('#copy-status');

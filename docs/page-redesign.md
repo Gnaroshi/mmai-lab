@@ -77,3 +77,14 @@ This revision changes presentation and the overview asset used by the detailed p
 Validation: checked 1440 and 985 px desktop layouts and 390 and 320 px mobile layouts. Paragraphs align with their content column; the real-world matrix fits the desktop column and scrolls internally on phones without document overflow. Verified keyboard scrolling, chart enlargement/close, mobile Contents navigation, and the detailed header return link. The static audit preserves all result values, asset and anchor references, 26 detailed players, and the original supplied chart bytes.
 
 Follow-up typography adjustment: explanatory paragraphs in both views use justified text, with a start-aligned final line and language-aware automatic hyphenation. Captions, headings, table cells, and navigation retain their existing alignment. Verified the Abstract and Method in the browser at the normal and narrow viewport, including absence of document overflow.
+
+
+## Reading and evidence review (2026-10-06)
+
+Baseline: `1e136b482999ef8541cf0cdef4c987d287d1b67d`. The default now shows three demo cards per row from 900 CSS px, two at 600–899 px, and one below 600 px. Each card names its action or camera condition. At the 985 px review width, the six-card gallery decreases from about 1,114 px to 684 px tall. The duplicate detailed-results action is removed from the hero; the header and closing link remain.
+
+The overview poster is an untouched frame at 125 seconds of the existing trimmed video. A prominent playback control starts the same video from its beginning and passes keyboard focus to the normal controls. Enlarged videos retain the clip's speed and task or variation context, including the TCP ground-truth/prediction legend and the 512 highest-weight points.
+
+Reconstruction figures preserve all ten original panels in row-major order, reflowing them into five, three, or two columns. LIBERO-Plus preserves the six original variation strips and scene pixels; the original Language wording wraps as HTML. Original-image enlargement remains available. The connected method diagram is not split: phones get a 960 px internal scroll area and a full-figure link. Benchmark scrolling hints appear only when the table overflows; on phones, the method column is fixed at 150 px.
+
+Validation: table cell text/order unchanged in all eight tables across both views; video source order unchanged (7 default, 26 full); all 14 original images and 27 videos byte-identical. Checked 320, 355, 768, and 985 CSS px without document overflow, overview play/focus, full-figure view, and enlarged video context. Roll back to the baseline to restore the previous presentation; original data and media have not changed.

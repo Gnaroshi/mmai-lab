@@ -39,7 +39,7 @@
 .full-study .next-arrow{font-size:26px;color:var(--accent)}
 .full-study>a:hover strong{text-decoration:underline;text-underline-offset:4px}
 .summary-page .citation{padding-bottom:28px}
-@media(min-width:600px) and (max-width:1099px){.demo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:600px) and (max-width:899px){.demo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:599px){
   .summary-page .hero{padding:20px 0 16px}
   .summary-page .hero h1{font-size:44px}
@@ -50,3 +50,5 @@
   .demo-grid{grid-template-columns:1fr;gap:14px}
   .demo-grid .clip-label{font-size:15px}
 }
+
+.demo-grid .clip-description{color:var(--muted);font-size:13px;line-height:1.45;margin-top:6px}

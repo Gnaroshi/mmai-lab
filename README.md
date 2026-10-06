@@ -11,9 +11,9 @@ Junhyeong Go¹, Mingyu Jung¹, Woobin Im², and Jongbin Ryu¹
 
 This repository contains the research project website and its public paper, figures, and demonstration videos. It does not contain the model implementation or training code.
 
-The 25 individual demonstration and visualization videos are the original MP4 files embedded in the presentation, preserved without trimming, transcoding, or speed changes. Static display viewports hide only verified blank border pixels in visualization clips; the underlying files remain unchanged. Both pages use the same lossless overview with only its opening 343 slide removed (74 frames, 3.086417 seconds); all remaining frames, resolution, and playback speed are preserved. The complete submitted overview remains available in the published assets. Task names, instructions, method explanations, and quantitative results follow the paper and explicitly identified rebuttal experiments.
+The original 25 presentation-embedded MP4s, complete submitted overview, and losslessly trimmed overview remain preserved as assets. Playback uses optimized H.264 copies in `assets/videos/optimized/`, with the same resolution, frame rate, frame count, duration, timestamps, audio, and speed labels. These high-quality lossy delivery copies reduce the 26 active files from 234.58 MB to 94.33 MB (59.79%). Their playback indexes precede the video data for progressive loading. Static display viewports hide only verified blank border pixels. Both pages use the overview with its opening 343 slide removed (74 frames, 3.086417 seconds). Task names, instructions, method explanations, and quantitative results follow the paper and explicitly identified rebuttal experiments.
 
-The full page introduces the problem and core idea, explains the method conceptually, then presents simulation experiments, real-world comparisons beside their quantitative results, and qualitative visualizations. Component ablations and supervision comparisons remain visible in Analysis, after the performance results. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
+The full page introduces the problem and core idea, explains the method with a three-stage animated architecture, then presents simulation experiments, real-world experiments, and analysis. Real-world Setup & Tasks precedes Task Performance, followed by Test-time Variations and the additional backbone. Analysis connects ablations, motion aggregation, point composition, and cross-task TCP trajectories in that order. VDPM reconstruction examples accompany Method because they show how training supervision is obtained.
 
 The Abstract reproduces the manuscript’s first-page wording verbatim, with PDF line numbers and line-wrap artifacts removed.
 
@@ -21,7 +21,9 @@ The default page follows the overview video → Abstract → Method → real-wor
 
 Each default demo includes a short task or variation description. Expanded videos retain their task, speed, and visualization context. The overview preview shows an original robot comparison frame with a prominent play button; playback still starts from the trimmed video’s beginning.
 
-Dense figures retain original pixels: reconstruction panels reflow in source order, LIBERO-Plus variation strips stack on phones, and language instructions wrap as text. The connected method diagram scrolls at a readable scale on phones, with a complete-figure view. Overflowing benchmark tables show a scrolling cue and keep a compact method column.
+Dense figures retain original pixels: reconstruction panels reflow in source order and language instructions wrap as text. The LIBERO-Plus scene montage is omitted; its seven perturbation types remain explained beside the results. The connected method diagram scrolls at a readable scale on phones, with a complete-figure view. Its animation can be paused, replayed, or inspected stage by stage; it pauses offscreen and defaults to static for reduced-motion preferences. Overflowing benchmark tables show a scrolling cue and keep a compact method column.
+
+Individual video controls are shown by default. Each paired or four-view group places Play all below its videos. Shared playback replaces the duplicate per-clip play/seek/restart controls with a single group timeline; Individual controls returns to independent playback without losing the current frames. Per-clip enlargement remains available. Sources are attached only near the viewport or on explicit playback; hidden gallery panels remain unloaded. Loading can be cancelled, failures can be retried, and no-JavaScript links open the delivery files directly.
 
 Paper Figure 2 retains both data-efficiency and computational-cost panels, with a shared caption. The training-time comparison excludes offline 3D reconstruction.
 
@@ -38,6 +40,7 @@ The site uses plain HTML, CSS, and JavaScript; no build step is required.
 - `flowvla/legacy-links.js`: old detailed anchors redirected to their preserved route
 - `flowvla/styles.css`: shared typography tokens, compact evidence tables, source/evaluation notes, and responsive layout
 - `flowvla/script.js`: seekable video players, group playback, task galleries, current-position outline, and figure enlargement
+- `flowvla/method-animation.js`: staged architecture animation and accessible playback controls
 - `flowvla/assets/`: published paper, images, and videos
 
 From the repository root, run:

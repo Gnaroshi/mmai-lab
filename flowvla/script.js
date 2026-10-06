@@ -49,6 +49,25 @@
     return { bar, play, seek, time, restart, enlarge, status };
   }
   const status = (ui, text, loading = false) => { ui.status.textContent = text; ui.status.dataset.loading = String(loading); ui.bar.setAttribute('aria-busy', String(loading)); };
+  const mediaURL = v => v.currentSrc || v.getAttribute('src') || v.dataset.src || $('source', v)?.getAttribute('src') || $('source', v)?.dataset.src;
+  function hydrate(v, preload = 'metadata') {
+    const first = !v.dataset.hydrated;
+    if (v.dataset.src && !v.getAttribute('src')) v.src = v.dataset.src;
+    $$('source[data-src]', v).forEach(source => { if (!source.getAttribute('src')) source.src = source.dataset.src; });
+    v.dataset.hydrated = 'true';
+    // Near-view metadata warms the header, never overrides an intentional playback download.
+    if (preload === 'auto' || v.preload !== 'auto') v.preload = preload;
+    if (first || v.error || v.networkState === 3) v.load();
+  }
+  const nearViewport = v => {
+    if (v === expanded || v.closest('[hidden], [inert]') || document.hidden) return false;
+    const r = v.getBoundingClientRect();
+    return r.bottom > -200 && r.top < innerHeight + 200;
+  };
+  function warm(v) { if (nearViewport(v)) hydrate(v); }
+  const mediaObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(entry => { if (entry.isIntersecting) warm(entry.target); });
+  }, { rootMargin: '200px 0px' }) : null;
   function updateVideo(v) {
     const s = states.get(v), d = duration(v), playing = !v.paused || s.pending;
     buttonState(s.ui.play, s.pending ? 'loading' : playing ? 'pause' : 'play', `${s.pending ? 'Cancel loading' : playing ? 'Pause' : 'Play'} ${s.title}`);
@@ -64,9 +83,22 @@
   const groupDuration = g => Math.max(0, ...g.videos.map(duration));
   const groupPlaying = g => g.pending || g.videos.some(v => !v.paused);
   function updateGroup(g) {
-    const d = groupDuration(g), active = groupPlaying(g);
+    const d = groupDuration(g), active = g.coordinated && groupPlaying(g);
     if (g.coordinated && g.running) g.time = g.master.currentTime;
     buttonState(g.ui.play, g.pending ? 'loading' : active ? 'pause' : 'play', `${g.pending ? 'Cancel loading' : active ? 'Pause' : 'Play'} all videos in ${g.label}`);
+    $('.control-scope', g.ui.play).textContent = g.pending ? 'Cancel' : active ? 'Pause all' : 'Play all';
+    g.ui.seek.hidden = g.ui.time.hidden = g.ui.restart.hidden = g.individual.hidden = !g.coordinated;
+    g.root.classList.toggle('is-coordinated', g.coordinated);
+    g.ui.bar.dataset.mode = g.coordinated ? 'together' : 'individual';
+    g.videos.forEach(v => {
+      const ui = states.get(v).ui;
+      [ui.play, ui.seek, ui.restart].forEach(control => {
+        if (g.coordinated && document.activeElement === control) g.ui.play.focus({ preventScroll: true });
+        control.hidden = g.coordinated;
+      });
+      ui.bar.classList.toggle('is-coordinated', g.coordinated);
+      ui.context.hidden = !g.coordinated;
+    });
     if (!g.seeking) g.ui.seek.value = d ? Math.min(1000, g.time / d * 1000) : 0;
     g.ui.time.textContent = `${format(g.time)} / ${d ? format(d) : '--:--'}`;
     g.ui.seek.setAttribute('aria-valuetext', `${format(g.time)} of ${d ? format(d) : 'unknown duration'}`);
@@ -76,26 +108,34 @@
     if (g.running) g.time = g.master.currentTime;
     g.token++; g.pending = false; g.running = false; g.videos.forEach(pauseOne); status(g.ui, ''); updateGroup(g);
   }
-  function independent(v) { const g = membership.get(v); if (g?.coordinated || g?.pending) { if (g.running) g.time = g.master.currentTime; g.token++; g.pending = false; g.running = false; g.coordinated = false; status(g.ui, ''); updateGroup(g); } }
+  function individualMode(g, focus = false) {
+    pauseGroup(g); g.coordinated = false; updateGroup(g);
+    if (focus) states.get(g.videos[0]).ui.play.focus({ preventScroll: true });
+  }
+  function independent(v) { const g = membership.get(v); if (g?.coordinated || g?.pending) individualMode(g); }
   function ready(v, level = 3) {
     if (v.readyState >= level && (level === 1 || !v.seeking)) return Promise.resolve();
-    v.preload = level === 1 ? 'metadata' : 'auto';
+    hydrate(v, level === 1 ? 'metadata' : 'auto');
     return new Promise((resolve, reject) => {
-      const event = level === 1 ? 'loadedmetadata' : 'canplay'; let timer;
-      const done = error => { clearTimeout(timer); v.removeEventListener(event, ok); v.removeEventListener('seeked', ok); v.removeEventListener('error', fail); error ? reject(error) : resolve(); };
+      const event = level === 1 ? 'loadedmetadata' : 'canplay', sources = $$('source', v); let timer;
+      const done = error => { clearTimeout(timer); v.removeEventListener(event, ok); v.removeEventListener('seeked', ok); v.removeEventListener('error', fail); sources.forEach(source => source.removeEventListener('error', fail)); error ? reject(error) : resolve(); };
       const ok = () => { if (v.readyState >= level && (level === 1 || !v.seeking)) done(); }, fail = () => done(new Error('Video unavailable'));
-      v.addEventListener(event, ok); v.addEventListener('seeked', ok); v.addEventListener('error', fail);
+      v.addEventListener(event, ok); v.addEventListener('seeked', ok); v.addEventListener('error', fail); sources.forEach(source => source.addEventListener('error', fail));
       timer = setTimeout(() => done(new Error('Video loading timed out')), 30000);
-      if (v.error || (v.readyState === 0 && v.networkState !== 2)) v.load();
+      ok();
     });
   }
   async function playOne(v, restart = false) {
     independent(v); const s = states.get(v); if (!available(v)) return;
     const token = ++s.token; s.pending = true; status(s.ui, 'Loading video…', true); updateVideo(v);
     try {
-      await ready(v); if (token !== s.token || !available(v)) return;
-      if (restart || v.ended || v.currentTime >= duration(v) - 0.03) v.currentTime = 0;
-      await v.play(); if (token === s.token) status(s.ui, '');
+      hydrate(v, 'auto');
+      if (restart || v.ended || (duration(v) && v.currentTime >= duration(v) - 0.03)) v.currentTime = 0;
+      // Call play in the original gesture so narrated overview audio works on mobile too.
+      await v.play();
+      if (token !== s.token) return;
+      if (!available(v)) { v.pause(); return; }
+      status(s.ui, '');
     } catch (_) { if (token === s.token) status(s.ui, 'Unable to play. Press Play to retry.'); }
     finally { if (token === s.token) { s.pending = false; updateVideo(v); } }
   }
@@ -105,28 +145,26 @@
     catch (_) { if (token === s.token) status(s.ui, 'Unable to seek. Try again.'); return false; }
   }
   async function playGroup(g, restart = false) {
-    pauseGroup(g); const token = g.token; g.pending = true; status(g.ui, 'Loading videos…', true); updateGroup(g);
+    const wasCoordinated = g.coordinated;
+    pauseGroup(g); const token = g.token;
+    g.coordinated = true; g.pending = true; status(g.ui, 'Loading videos…', true); updateGroup(g);
     try {
-      await Promise.all(g.videos.map(v => ready(v, duration(v) > 0 && v.currentTime >= duration(v) - 0.03 ? 1 : 3)));
+      g.videos.forEach(v => hydrate(v, 'auto'));
+      await Promise.all(g.videos.map(v => ready(v, 1)));
       if (token !== g.token || !g.videos.every(available)) return;
       const d = groupDuration(g); g.master = g.videos.reduce((a, b) => duration(a) >= duration(b) ? a : b);
-      if (restart || !g.coordinated || g.time >= d - 0.03) g.time = 0;
-      g.coordinated = true;
+      if (restart || !wasCoordinated || g.time >= d - 0.03) g.time = 0;
       g.videos.forEach(v => { const target = Math.min(g.time, duration(v)); if (Math.abs(v.currentTime - target) > 0.02) v.currentTime = target; });
-      await Promise.all(g.videos.map(v => ready(v, duration(v) > 0 && v.currentTime >= duration(v) - 0.03 ? 1 : 3)));
-      if (token !== g.token || !g.videos.every(available)) return;
       const active = g.videos.filter(v => g.time < duration(v) - 0.03);
-      if (g.sync) {
-        await Promise.all(active.map(async v => { await v.play(); if (token === g.token) v.pause(); }));
-        if (token !== g.token || !g.videos.every(available)) return;
-        active.forEach(v => { if (Math.abs(v.currentTime - g.time) > 0.001) v.currentTime = g.time; });
-        await Promise.all(active.map(v => ready(v)));
-        if (token !== g.token || !g.videos.every(available)) return;
-      }
+      await Promise.all(active.map(v => ready(v)));
+      if (token !== g.token || !g.videos.every(available)) return;
       await Promise.all(active.map(v => v.play()));
-      if (token === g.token) { g.running = true; status(g.ui, ''); }
-    } catch (_) { if (token === g.token) { g.videos.forEach(v => v.pause()); status(g.ui, 'Unable to play. Use the play button marked All to retry.'); } }
-    finally { if (token === g.token) { g.pending = false; updateGroup(g); } }
+      if (token !== g.token) return;
+      if (!g.videos.every(available)) { active.forEach(v => v.pause()); return; }
+      g.running = true; status(g.ui, '');
+    } catch (_) {
+      if (token === g.token) { g.videos.forEach(v => v.pause()); status(g.ui, 'Could not load every video. Retry Play all, or use individual controls.'); }
+    } finally { if (token === g.token) { g.pending = false; updateGroup(g); } }
   }
   async function seekGroup(g, ratio) {
     pauseGroup(g); const token = g.token; status(g.ui, 'Loading videos…', true);
@@ -146,14 +184,24 @@
     const shell = v.closest('.media-shell') || v.parentElement, title = shell.dataset.title || v.getAttribute('aria-label') || 'video';
     const ui = toolbar('player', title), s = { ui, title, start: $('.overview-start', shell), token: 0, pending: false, seeking: false };
     states.set(v, s); v.controls = false; v.autoplay = false; v.removeAttribute('autoplay'); v.loop = false; v.playsInline = true;
-    shell.append(ui.bar);
+    ui.context = node('span', 'player-group-context', 'Together'); ui.context.hidden = true;
+    ui.bar.prepend(ui.context); shell.append(ui.bar);
+    if (v !== expanded) mediaObserver?.observe(v);
+    ui.bar.addEventListener('pointerenter', () => warm(v), { passive: true });
+    ui.bar.addEventListener('focusin', () => warm(v));
     const togglePlayback = () => { if (!v.paused || s.pending) { independent(v); pauseOne(v); } else playOne(v); };
     ui.play.addEventListener('click', togglePlayback);
     s.start?.addEventListener('click', togglePlayback);
     ui.restart.addEventListener('click', () => playOne(v, true));
     wireSeek(ui, s, ratio => seekOne(v, ratio), () => !v.paused || s.pending, () => playOne(v));
     ['loadedmetadata', 'durationchange', 'timeupdate', 'play', 'pause', 'ended', 'seeked'].forEach(event => v.addEventListener(event, () => { updateVideo(v); const g = membership.get(v); if (g) updateGroup(g); }));
-    v.addEventListener('error', () => { if (s.pending) return; status(ui, 'Unable to load video. Press Play to retry.'); });
+    v.addEventListener('waiting', () => { const g = membership.get(v); if (!v.paused) status(g?.coordinated ? g.ui : ui, 'Buffering…', true); });
+    v.addEventListener('playing', () => { const g = membership.get(v); status(g?.coordinated ? g.ui : ui, ''); });
+    v.addEventListener('error', () => {
+      const g = membership.get(v);
+      if (g?.coordinated) { if (!g.pending) { pauseGroup(g); status(g.ui, 'A video could not load. Retry Play all, or use individual controls.'); } return; }
+      if (!s.pending && v.dataset.hydrated) status(ui, 'Unable to load video. Press Play to retry.');
+    });
     ui.enlarge.hidden = v === expanded || !dialog || !expanded;
     ui.enlarge.addEventListener('click', () => {
       if (!dialog || !expanded) return;
@@ -179,23 +227,25 @@
       labelButton(expandedState.ui.restart, `Restart enlarged ${title} from the beginning`);
       updateVideo(expanded);
       expanded.onloadedmetadata = () => { expanded.currentTime = Math.min(position, expanded.duration); };
-      expanded.src = v.currentSrc || $('source', v)?.getAttribute('src') || v.getAttribute('src'); expanded.preload = 'auto'; expanded.load(); dialog.showModal();
+      expanded.src = mediaURL(v); expanded.preload = 'metadata'; expanded.load(); dialog.showModal();
     });
     updateVideo(v);
   });
   $$('.media-group').forEach(root => {
     const members = $$('video', root).filter(v => states.has(v)); if (!members.length) return;
     const label = root.dataset.groupLabel || 'Videos', ui = toolbar('group', label, true);
-    const g = { videos: members, ui, label, token: 0, time: 0, pending: false, running: false, coordinated: false, seeking: false, master: members[0], sync: members.every(v => v.dataset.sync === 'aggregation') };
-    groups.push(g); members.forEach(v => membership.set(v, g)); root.prepend(ui.bar);
-    ui.play.addEventListener('click', () => groupPlaying(g) ? pauseGroup(g) : playGroup(g)); ui.restart.addEventListener('click', () => playGroup(g, true));
+    const individual = node('button', 'group-individual', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.bar.append(individual);
+    const g = { root, individual, videos: members, ui, label, token: 0, time: 0, pending: false, running: false, coordinated: false, seeking: false, master: members[0], sync: members.every(v => v.dataset.sync === 'aggregation') };
+    groups.push(g); members.forEach(v => membership.set(v, g)); root.append(ui.bar);
+    individual.addEventListener('click', () => individualMode(g, true));
+    ui.play.addEventListener('click', () => g.coordinated && groupPlaying(g) ? pauseGroup(g) : playGroup(g)); ui.restart.addEventListener('click', () => playGroup(g, true));
     wireSeek(ui, g, ratio => seekGroup(g, ratio), () => groupPlaying(g), () => playGroup(g)); updateGroup(g);
   });
   $$('.media-gallery[data-gallery]').forEach(gallery => {
     const choices = $$('[data-choice]', gallery), panels = $$('[data-panel]', gallery);
     const select = choice => {
       choices.forEach(b => { const selected = b === choice; b.setAttribute('aria-pressed', String(selected)); b.classList.toggle('is-active', selected); });
-      panels.forEach(p => { p.hidden = p.dataset.panel !== choice.dataset.choice; p.inert = p.hidden; p.toggleAttribute('inert', p.hidden); p.setAttribute('aria-hidden', String(p.hidden)); if (p.hidden) { groups.filter(g => p.contains(g.videos[0])).forEach(pauseGroup); $$('video', p).filter(v => states.has(v)).forEach(pauseOne); } });
+      panels.forEach(p => { p.hidden = p.dataset.panel !== choice.dataset.choice; p.inert = p.hidden; p.toggleAttribute('inert', p.hidden); p.setAttribute('aria-hidden', String(p.hidden)); if (p.hidden) { groups.filter(g => p.contains(g.videos[0])).forEach(pauseGroup); $$('video', p).filter(v => states.has(v)).forEach(pauseOne); } else $$('video', p).forEach(warm); });
     };
     const alignHeadings = () => {
       const headings = panels.map(p => $('.task-heading', p)).filter(Boolean);
@@ -206,6 +256,8 @@
     alignHeadings();
     choices.forEach(b => b.addEventListener('click', () => select(b))); if (choices.length) select(choices.find(b => b.getAttribute('aria-pressed') === 'true') || choices[0]);
   });
+  if (!mediaObserver) videos.forEach(warm);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) videos.forEach(warm); });
   let lastSync = 0;
   const tick = time => {
     if (time - lastSync > 200) {
@@ -222,7 +274,11 @@
   $('#close-dialog')?.addEventListener('click', () => dialog.close());
   dialog?.addEventListener('click', e => { if (e.target === dialog) { const r = dialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close(); } });
   dialog?.addEventListener('close', () => {
-    if (expandedSource && expanded.readyState >= 1 && Number.isFinite(expanded.currentTime)) { expandedSource.currentTime = Math.min(expanded.currentTime, duration(expandedSource)); updateVideo(expandedSource); }
+    if (expandedSource && expanded.readyState >= 1 && Number.isFinite(expanded.currentTime)) {
+      const position = Math.min(expanded.currentTime, duration(expandedSource)), source = expandedSource, g = membership.get(source);
+      if (g?.coordinated) seekGroup(g, groupDuration(g) ? position / groupDuration(g) : 0);
+      else { hydrate(source); ready(source, 1).then(() => { source.currentTime = position; updateVideo(source); }).catch(() => {}); }
+    }
     expanded.pause(); expanded.onloadedmetadata = null; expanded.removeAttribute('src'); expanded.load(); opener?.focus({ preventScroll: true }); expandedSource = null;
     if (dialogContext) { dialogContext.textContent = ''; dialogContext.hidden = true; }
   });
@@ -316,7 +372,7 @@
     navQueued = false;
     const headerBottom = $('.site-header')?.getBoundingClientRect().bottom || 0;
     const scrollPadding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    const readingLine = Math.min(innerHeight - 1, Math.max(80, headerBottom + 24, scrollPadding + 1));
+    const readingLine = Math.min(innerHeight - 1, Math.max(80, headerBottom + 40, scrollPadding + 24));
     const sections = sectionRecords.filter(record => visibleTarget(record.target))
       .map(record => ({ ...record, rect: record.target.getBoundingClientRect() }));
     const atEnd = scrollY > 0 && Math.ceil(scrollY + innerHeight) >= document.documentElement.scrollHeight - 2;

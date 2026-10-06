@@ -6,13 +6,8 @@
   --brand-coral:#f2886b;
   --brand-orange:#feb785;
   --brand-navy:#111e35;
-  /* Same-hue text tones keep the lighter logo gradients readable on white. */
-  --sky-ink:#115df9;--sky-soft:#f0f5ff;
-  --violet-ink:#9339e4;--violet-soft:#f8f3fd;
-  --coral-ink:#c53811;--coral-soft:#fef3f0;
+  /* One interaction accent throughout; orange is reserved for result emphasis. */
   --result-ink:#b44b01;--result-soft:#fff8f3;
-  --section-accent:var(--brand-blue);
-  --section-soft:var(--accent-soft);
   --accent:var(--brand-blue);
   --accent-hover:#04357a;
   --accent-soft:#ebf0f7;
@@ -105,7 +100,7 @@ h2:has(>.heading-number),h3:has(>.heading-number){display:grid;grid-template-col
 .outline-sublist .outline-number{flex-basis:28px}
 .outline-nav a:hover,.main-nav a:hover{color:var(--ink);background:var(--soft)}
 .outline-nav a[aria-current],.main-nav a[aria-current]{color:var(--accent);background:var(--accent-soft);border-left-color:var(--accent);font-weight:650;text-decoration:none;border-radius:0 4px 4px 0}
-.outline-item.is-current-section>a{color:var(--ink)}
+.outline-item.is-current-section>a:not([aria-current]){color:var(--ink)}
 .js .page-outline .outline-sublist{display:none}
 .js .page-outline .is-current-section>.outline-sublist{display:block}
 .page-outline{overflow-anchor:none;display:none;position:fixed;top:106px;width:180px;max-height:calc(100dvh - 136px);overflow-y:auto;scrollbar-width:thin;z-index:10}
@@ -448,17 +443,8 @@ h2:has(>.heading-number),h3:has(>.heading-number){display:grid;grid-template-col
   .full-page .hero{padding:var(--space-5) 0 var(--space-4)}
 }
 
-/* Logo colors communicate content roles across both reading routes. */
-:is(#overview,#abstract,.outline-item[data-section="overview"],.outline-item[data-section="abstract"]){--section-accent:var(--sky-ink);--section-soft:var(--sky-soft)}
-:is(#method,.outline-item[data-section="method"]){--section-accent:var(--violet-ink);--section-soft:var(--violet-soft)}
-:is(#real-world,.outline-item[data-section="real-world"]){--section-accent:var(--coral-ink);--section-soft:var(--coral-soft)}
-:is(#experiments,#results,.outline-item[data-section="experiments"],.outline-item[data-section="results"]){--section-accent:var(--result-ink);--section-soft:var(--result-soft)}
-.full-page .heading-number{color:var(--section-accent)}
-.full-page :is(.outline-nav,.main-nav) a[aria-current]{color:var(--section-accent);border-color:var(--section-accent);background:var(--section-soft)}
-.full-page .choices button[aria-pressed="true"]{color:var(--section-accent);border-color:var(--section-accent);background:var(--section-soft)}
+/* Shared navigation and selection styles apply unchanged in every section. */
 .full-page .task-category>h4,.full-page .task-category>p{text-align:center}
-.full-page .task-category:first-child>h4{color:var(--coral-ink)}
-.full-page .task-category:last-child>h4{color:var(--violet-ink)}
 .full-page .result-highlight{color:var(--result-ink);font-weight:var(--weight-bold);white-space:nowrap}
 .full-page :is(.ours th,.ours td,.ours-column){color:var(--result-ink);background:var(--result-soft);font-weight:var(--weight-bold)}
 .full-page .task-matrix tbody tr.ours th[scope="row"]{background:var(--result-soft)}

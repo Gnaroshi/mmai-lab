@@ -13,6 +13,7 @@
   const iconPaths = {
     play: '<path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none"/>',
     pause: '<path d="M8 5v14M16 5v14" stroke-width="4"/>',
+    stop: '<rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor" stroke="none"/>',
     restart: '<path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6"/>',
     expand: '<path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/>',
     loading: '<circle cx="12" cy="12" r="8" opacity=".2"/><path d="M12 4a8 8 0 0 1 8 8"/>'
@@ -42,11 +43,21 @@
     const play = button(`${prefix}-play`, 'play', `Play ${scope}`, grouped);
     const seek = node('input', `${prefix}-seek`); seek.type = 'range'; seek.min = 0; seek.max = 1000; seek.step = 1; seek.value = 0; seek.setAttribute('aria-label', `Seek ${title}`);
     const time = node('output', `${prefix}-time`, '0:00 / --:--');
-    const restart = button(`${prefix}-restart`, 'restart', `Restart ${scope} from the beginning`, grouped);
+    const restart = button(`${prefix}-restart`, 'restart', `${grouped ? 'Replay' : 'Restart'} ${scope} from the beginning`, grouped);
     const enlarge = grouped ? null : button('player-expand', 'expand', `Enlarge ${title}`);
     const status = node('span', `${prefix}-status`); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
-    bar.append(play, seek, time, restart); if (enlarge) bar.append(enlarge); bar.append(status);
-    return { bar, play, seek, time, restart, enlarge, status };
+    let stop = null, timeline = null;
+    if (grouped) {
+      const actions = node('div', 'group-actions');
+      stop = button('group-stop', 'stop', `Stop all videos in ${title} and return to the beginning`, true);
+      $('.control-scope', stop).textContent = 'Stop';
+      $('.control-scope', restart).textContent = 'Replay';
+      actions.append(play, stop, restart);
+      timeline = node('div', 'group-timeline'); timeline.append(seek, time);
+      bar.append(actions, timeline);
+    } else { bar.append(play, seek, time, restart, enlarge); }
+    bar.append(status);
+    return { bar, play, seek, time, restart, stop, timeline, enlarge, status };
   }
   const status = (ui, text, loading = false) => { ui.status.textContent = text; ui.status.dataset.loading = String(loading); ui.bar.setAttribute('aria-busy', String(loading)); };
   const mediaURL = v => v.currentSrc || v.getAttribute('src') || v.dataset.src || $('source', v)?.getAttribute('src') || $('source', v)?.dataset.src;
@@ -87,7 +98,7 @@
     if (g.coordinated && g.running) g.time = g.master.currentTime;
     buttonState(g.ui.play, g.pending ? 'loading' : active ? 'pause' : 'play', `${g.pending ? 'Cancel loading' : active ? 'Pause' : 'Play'} all videos in ${g.label}`);
     $('.control-scope', g.ui.play).textContent = g.pending ? 'Cancel' : active ? 'Pause all' : 'Play all';
-    g.ui.seek.hidden = g.ui.time.hidden = g.ui.restart.hidden = g.individual.hidden = !g.coordinated;
+    g.ui.timeline.hidden = !g.coordinated;
     g.root.classList.toggle('is-coordinated', g.coordinated);
     g.ui.bar.dataset.mode = g.coordinated ? 'together' : 'individual';
     g.videos.forEach(v => {
@@ -111,6 +122,16 @@
   function individualMode(g, focus = false) {
     pauseGroup(g); g.coordinated = false; updateGroup(g);
     if (focus) states.get(g.videos[0]).ui.play.focus({ preventScroll: true });
+  }
+  function stopGroup(g) {
+    pauseGroup(g); g.time = 0; g.seeking = false; g.coordinated = false;
+    // Stopping an unplayed group must not start metadata or media downloads.
+    g.videos.forEach(v => {
+      const s = states.get(v); s.seeking = false;
+      if (v.readyState >= 1 || v.currentTime > 0) v.currentTime = 0;
+      updateVideo(v);
+    });
+    updateGroup(g);
   }
   function independent(v) { const g = membership.get(v); if (g?.coordinated || g?.pending) individualMode(g); }
   function ready(v, level = 3) {
@@ -237,10 +258,11 @@
   $$('.media-group').forEach(root => {
     const members = $$('video', root).filter(v => states.has(v)); if (!members.length) return;
     const label = root.dataset.groupLabel || 'Videos', ui = toolbar('group', label, true);
-    const individual = node('button', 'group-individual media-action', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.bar.append(individual);
+    const individual = node('button', 'group-individual media-action', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.timeline.append(individual);
     const g = { root, individual, videos: members, ui, label, token: 0, time: 0, pending: false, running: false, coordinated: false, seeking: false, master: members[0], sync: members.every(v => v.dataset.sync === 'aggregation') };
     groups.push(g); members.forEach(v => membership.set(v, g)); root.append(ui.bar);
     individual.addEventListener('click', () => individualMode(g, true));
+    ui.stop.addEventListener('click', () => stopGroup(g));
     ui.play.addEventListener('click', () => g.coordinated && groupPlaying(g) ? pauseGroup(g) : playGroup(g)); ui.restart.addEventListener('click', () => playGroup(g, true));
     wireSeek(ui, g, ratio => seekGroup(g, ratio), () => groupPlaying(g), () => playGroup(g)); updateGroup(g);
   });

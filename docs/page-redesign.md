@@ -88,3 +88,8 @@ The overview poster is an untouched frame at 125 seconds of the existing trimmed
 Reconstruction figures preserve all ten original panels in row-major order, reflowing them into five, three, or two columns. LIBERO-Plus preserves the six original variation strips and scene pixels; the original Language wording wraps as HTML. Original-image enlargement remains available. The connected method diagram is not split: phones get a 960 px internal scroll area and a full-figure link. Benchmark scrolling hints appear only when the table overflows; on phones, the method column is fixed at 150 px.
 
 Validation: table cell text/order unchanged in all eight tables across both views; video source order unchanged (7 default, 26 full); all 14 original images and 27 videos byte-identical. Checked 320, 355, 768, and 985 CSS px without document overflow, overview play/focus, full-figure view, and enlarged video context. Roll back to the baseline to restore the previous presentation; original data and media have not changed.
+
+
+## Verbatim manuscript abstract (2026-10-06)
+
+The default Abstract now reproduces the complete abstract from page 1 of the linked manuscript. PDF line numbers, ligatures, and discretionary line-break hyphens are normalized for HTML; wording, punctuation, and lexical hyphens are preserved. The detailed Overview retains its separately labeled conceptual introduction. Verified against the rendered PDF and two independent text extractions. Outside the Abstract paragraph, the default HTML is unchanged; the detailed page is byte-identical to the preceding revision (`8577090`).

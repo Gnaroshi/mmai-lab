@@ -1,37 +1,3 @@
-/* Default-page typography: system fonts and rem units follow browser preferences.
-   Reference: https://getbootstrap.com/docs/5.3/content/reboot/#page-defaults
-   Kept here so the separate detailed view retains its existing presentation. */
-.summary-page{
-  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --text-display:3rem;
-  --text-title:1.75rem;
-  --text-subtitle:1.5rem;
-  --text-body:1.125rem;
-  --text-table:1rem;
-  --text-ui:1rem;
-  --text-caption:.875rem;
-  --text-meta:.875rem;
-  --text-micro:.75rem;
-  --weight-regular:400;
-  --weight-medium:500;
-  --weight-semibold:600;
-  --weight-bold:700;
-  --leading-body:1.65;
-  --leading-compact:1.4;
-  --leading-table:1.375;
-  --evidence-inset:1rem;
-
-  --cell-block:.375rem;
-  --cell-inline:.625rem;
-  --body:var(--text-body);
-  --section-title:var(--text-title);
-  --subsection-title:var(--text-subtitle);
-  font-family:var(--font-sans);
-  font-size:var(--text-body);
-  font-weight:var(--weight-regular);
-  line-height:var(--leading-body);
-}
 /* A compact, video-first project page; the detailed study shares the assets. */
 .summary-page .hero{padding:24px 0 18px}
 .summary-page .hero h1{font-size:var(--text-display)}
@@ -63,17 +29,9 @@
 .summary-result>h3{margin-bottom:8px}
 .summary-result+.summary-result{padding-top:24px;margin-top:24px;border-top:1px solid var(--line)}
 .summary-page .table-block{margin-top:14px}
-.full-study{border-top:1px solid var(--line);padding:0}
-.full-study>a{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;min-height:88px;padding:20px 0;color:var(--ink)}
-.full-study>a:hover{text-decoration:none}
-.full-study strong{display:block;font-size:var(--text-body);line-height:1.4;color:var(--accent)}
-.full-study small{display:block;margin-top:5px;font-size:var(--text-caption);line-height:1.5;color:var(--muted)}
-.full-study .next-arrow{font-size:var(--text-subtitle);color:var(--accent)}
-.full-study>a:hover strong{text-decoration:underline;text-underline-offset:4px}
 .summary-page .citation{padding-bottom:28px}
 @media(min-width:600px) and (max-width:899px){.demo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:599px){
-  .summary-page{--text-display:2.5rem;--text-title:1.5rem;--text-subtitle:1.25rem;--text-body:1rem}
   .summary-page .hero{padding:20px 0 16px}
   .summary-page .hero h1{font-size:var(--text-display)}
   .summary-page .paper-title{font-size:var(--text-subtitle)}
@@ -85,84 +43,6 @@
 
 .demo-grid .clip-description{color:var(--muted);font-size:var(--text-caption);line-height:1.45;margin-top:6px}
 
-/* Type roles override the shared legacy sizes only on the default page. */
-.summary-page h1,.summary-page h2{font-weight:var(--weight-bold)}
-.summary-page h3,.summary-page strong,.summary-page .brand,.summary-page .clip-label,
-.summary-page .figure-caption-title,.summary-page .table-source-link,.summary-page .table-source-label,
-.summary-page .overview-start,.summary-page .heading-number,.summary-page .button,
-.summary-page .task-groups th,.summary-page .outline-nav a[aria-current],
-.summary-page .main-nav a[aria-current]{font-weight:var(--weight-semibold)}
-.summary-page .paper-title,.summary-page .outline-item>a{font-weight:var(--weight-medium)}
-.summary-page tbody th{font-weight:var(--weight-regular)}
-.summary-page .ours th,.summary-page .ours td{font-weight:var(--weight-semibold)}
-.summary-page .button,.summary-page .nav-location{font-size:var(--text-ui)}
-.summary-page .brand,.summary-page .authors{font-size:var(--text-table)}
-.summary-page .brand small,.summary-page .affiliations,.summary-page .venue,
-.summary-page .outline-title,.summary-page .outline-number,.summary-page .outline-nav a,
-.summary-page .nav-label,.summary-page .main-nav a,.summary-page footer p{font-size:var(--text-meta)}
-.summary-page .research-figure figcaption,.summary-page .rf-scroll-cue,
-.summary-page #dialog-context,.summary-page #figure-dialog-caption,
-.summary-page #copy-status,.summary-page .table-scroll-hint{font-size:var(--text-caption)}
-.summary-page .player-time,.summary-page .overview-start small{font-size:var(--text-micro)}
-.summary-page .overview-start{font-size:var(--text-ui)}
-.summary-page pre{font-family:var(--font-mono);font-size:var(--text-meta);line-height:1.6}
-/* Evidence is compact through structure and spacing, with readable 16 px values. */
-.summary-page table{font-family:var(--font-sans);font-size:var(--text-table);line-height:var(--leading-table)}
-.summary-page thead th{font-size:var(--text-meta);font-weight:var(--weight-semibold);line-height:var(--leading-compact)}
-.summary-page .table-title{font-size:var(--text-table);font-weight:var(--weight-semibold)}
-.summary-page .table-metric,.summary-page .table-provenance,
-.summary-page .table-source-link>span,.summary-page .table-footer .table-note,
-.summary-page .performance-table-heading,.summary-page .method-venue{font-size:var(--text-meta);line-height:1.5}
-.summary-page .table-block{border:0;border-radius:0;overflow:visible}
-.summary-page .table-caption{padding:8px var(--evidence-inset);background:white;border-top:1px solid #aebdce}
-.summary-page .table-footer{padding:10px var(--evidence-inset) 0;border-top:1px solid #aebdce;background:white}
-.summary-page .table-footer .table-note{margin-top:4px}
-.summary-page .table-provenance{column-gap:5px}
-.summary-page .table-source-label{font-weight:var(--weight-medium)}
-.summary-page .table-scroll-hint{padding:6px var(--evidence-inset)}
-.summary-page .benchmark-table{min-width:40rem}
-.summary-page .benchmark-table th,.summary-page .benchmark-table td{padding:var(--cell-block) var(--cell-inline)}
-.summary-page .benchmark-table th:first-child{padding-left:var(--evidence-inset)}
-.summary-page .benchmark-table th:last-child,.summary-page .benchmark-table td:last-child{padding-right:var(--evidence-inset)}
-.summary-page .benchmark-table thead th{border-top:1px solid var(--line);border-bottom:1px solid #aebdce;background:#f7f9fc}
-.summary-page .benchmark-table tbody tr:has(+.ours)>*{border-top:1px solid #aebdce}
-.summary-page .benchmark-table tbody tr:not(.ours):hover>*{background:#f7f9fc}
-.summary-page .ours th,.summary-page .ours td{background:#f1f5fc}
-
-/* The full chart stays visible; only the numeric comparison scrolls. */
-.summary-page .performance-results{margin-top:16px;border:0;border-radius:0;overflow:visible}
-.summary-page .performance-chart{padding:0;border:0;border-radius:0}
-.summary-page .performance-table-heading{padding:8px var(--evidence-inset);margin-top:12px;background:white;border:0;border-top:1px solid #aebdce}
-.summary-page .performance-results .scroll-hint{font-size:var(--text-caption)}
-.summary-page .task-matrix{min-width:45.75rem;table-layout:fixed}
-.summary-page .task-matrix col.model-column{width:9.5rem}
-.summary-page .task-matrix .task-cup{width:3.375rem}
-.summary-page .task-matrix .task-fruit{width:3rem}
-.summary-page .task-matrix .task-stack{width:3.5rem}
-.summary-page .task-matrix .task-cabinet{width:4rem}
-.summary-page .task-matrix .task-basketball{width:5.125rem}
-.summary-page .task-matrix .task-hang{width:3.25rem}
-.summary-page .task-matrix .task-ring{width:4.5rem}
-.summary-page .task-matrix .task-viewpoint{width:5.5rem}
-.summary-page .task-matrix .task-height{width:4rem}
-.summary-page .task-matrix th,.summary-page .task-matrix td{padding:var(--cell-block) 6px;text-align:center;line-height:var(--leading-table)}
-.summary-page .task-matrix thead th{background:white;border-top:0;border-bottom:1px solid var(--line)}
-.summary-page .task-matrix .task-groups th{padding-block:5px;color:var(--muted);font-weight:var(--weight-medium);border-top:1px solid var(--line)}
-.summary-page .task-matrix .task-groups .model-corner{background:white;border-top:1px solid var(--line);border-bottom:0}
-.summary-page .task-matrix .model-corner,.summary-page .task-matrix .model-heading,
-.summary-page .task-matrix th[scope=row]{position:sticky;left:0;z-index:2;width:9.5rem;min-width:9.5rem;max-width:none;padding-left:var(--evidence-inset);padding-right:12px;text-align:left;white-space:nowrap;background:white;box-shadow:1px 0 var(--line)}
-.summary-page .task-matrix .model-heading{vertical-align:middle}
-.summary-page .task-matrix tbody tr.ours th[scope=row]{background:#f1f5fc}
-.summary-page .task-matrix .task-group-start{border-left:1px solid var(--line)}
-.summary-page .task-matrix tbody td{white-space:nowrap}
-.summary-page .task-matrix tbody tr:last-child>*{border-bottom:0}
-.summary-page .task-matrix sup{color:var(--muted);font-weight:var(--weight-regular)}
-.summary-page .performance-results .table-footer{padding-top:10px}
-.condition-notes{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-top:8px;font-size:var(--text-meta);line-height:1.5;color:var(--muted)}
-.condition-notes p{margin:0;text-align:left}
-@container(min-width:45.75rem){.summary-page .performance-results .scroll-hint{display:none}}
-@container(max-width:45.749rem){.summary-page .performance-results .scroll-hint{display:inline}}
-
 /* Related evidence reads as a separate destination, not a table footnote. */
 .related-result{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;margin-top:28px;padding:14px var(--evidence-inset);border-left:2px solid var(--line);background:#f8fafc}
 .related-result h4{font-size:var(--text-table);font-weight:var(--weight-semibold);letter-spacing:0;line-height:1.4}
@@ -172,9 +52,6 @@
 .summary-page .section-heading h2{margin:0}
 .summary-page #real-world>p,.summary-page .summary-result>p{text-align:left;hyphens:none}
 @media(max-width:600px){
-  .summary-page .benchmark-table th:first-child{width:10.75rem;min-width:10.75rem;max-width:10.75rem}
-  .summary-page .method-venue{margin-top:1px}
-  .condition-notes{grid-template-columns:1fr;gap:6px}
   .related-result{align-items:flex-start;flex-direction:column;gap:4px;padding-block:12px}
   .section-heading{align-items:baseline;column-gap:12px}
 }

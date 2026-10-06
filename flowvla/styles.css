@@ -171,3 +171,163 @@ h2:has(>.heading-number),h3:has(>.heading-number){display:grid;grid-template-col
 .rf-perturbations{max-width:100%}
 
 .rf-scroll-cue a{display:inline-flex;align-items:center;min-height:36px;font-weight:600;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+
+/* Common typography and evidence presentation for both research views. */
+.full-page{
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --text-display:3rem;
+  --text-title:1.75rem;
+  --text-subtitle:1.5rem;
+  --text-body:1.125rem;
+  --text-table:1rem;
+  --text-ui:1rem;
+  --text-caption:.875rem;
+  --text-meta:.875rem;
+  --text-micro:.75rem;
+  --weight-regular:400;
+  --weight-medium:500;
+  --weight-semibold:600;
+  --weight-bold:700;
+  --leading-body:1.65;
+  --leading-compact:1.4;
+  --leading-table:1.375;
+  --evidence-inset:1rem;
+
+  --cell-block:.375rem;
+  --cell-inline:.625rem;
+  --body:var(--text-body);
+  --section-title:var(--text-title);
+  --subsection-title:var(--text-subtitle);
+  font-family:var(--font-sans);
+  font-size:var(--text-body);
+  font-weight:var(--weight-regular);
+  line-height:var(--leading-body);
+}
+/* Shared type roles for the default and detailed routes. */
+.full-page h1,.full-page h2{font-weight:var(--weight-bold)}
+.full-page h3,.full-page strong,.full-page .brand,.full-page .clip-label,
+.full-page .figure-caption-title,.full-page .table-source-link,.full-page .table-source-label,
+.full-page .overview-start,.full-page .heading-number,.full-page .button,
+.full-page .task-groups th,.full-page .outline-nav a[aria-current],
+.full-page .main-nav a[aria-current]{font-weight:var(--weight-semibold)}
+.full-page .paper-title,.full-page .outline-item>a{font-weight:var(--weight-medium)}
+.full-page tbody th{font-weight:var(--weight-regular)}
+.full-page .ours th,.full-page .ours td{font-weight:var(--weight-semibold)}
+.full-page .button,.full-page .nav-location{font-size:var(--text-ui)}
+.full-page .brand,.full-page .authors{font-size:var(--text-table)}
+.full-page .brand small,.full-page .affiliations,.full-page .venue,
+.full-page .outline-title,.full-page .outline-number,.full-page .outline-nav a,
+.full-page .nav-label,.full-page .main-nav a,.full-page footer p{font-size:var(--text-meta)}
+.full-page .research-figure figcaption,.full-page .rf-scroll-cue,
+.full-page #dialog-context,.full-page #figure-dialog-caption,
+.full-page #copy-status,.full-page .table-scroll-hint{font-size:var(--text-caption)}
+.full-page .player-time,.full-page .overview-start small{font-size:var(--text-micro)}
+.full-page .overview-start{font-size:var(--text-ui)}
+.full-page pre{font-family:var(--font-mono);font-size:var(--text-meta);line-height:1.6}
+/* Evidence is compact through structure and spacing, with readable 16 px values. */
+.full-page table{font-family:var(--font-sans);font-size:var(--text-table);line-height:var(--leading-table)}
+.full-page thead th{font-size:var(--text-meta);font-weight:var(--weight-semibold);line-height:var(--leading-compact)}
+.full-page .table-title{font-size:var(--text-table);font-weight:var(--weight-semibold)}
+.full-page .table-metric,.full-page .table-provenance,
+.full-page .table-source-link>span,.full-page .table-footer .table-note,
+.full-page .performance-table-heading,.full-page .method-venue{font-size:var(--text-meta);line-height:1.5}
+.full-page .table-block{border:0;border-radius:0;overflow:visible}
+.full-page .table-caption{padding:8px var(--evidence-inset);background:white;border-top:1px solid #aebdce}
+.full-page .table-footer{padding:12px var(--evidence-inset);border-top:1px solid #aebdce;background:var(--surface)}
+.full-page .table-footer .table-note{margin-top:4px}
+.full-page .table-provenance{column-gap:5px}
+.full-page .table-source-label{font-weight:var(--weight-medium)}
+.full-page .table-scroll-hint{padding:6px var(--evidence-inset)}
+.full-page .benchmark-table{min-width:40rem}
+.full-page .benchmark-table th,.full-page .benchmark-table td{padding:var(--cell-block) var(--cell-inline)}
+.full-page .benchmark-table th:first-child{padding-left:var(--evidence-inset);position:sticky;left:0;z-index:1;box-shadow:1px 0 var(--line)}
+.full-page .benchmark-table th:last-child,.full-page .benchmark-table td:last-child{padding-right:var(--evidence-inset)}
+.full-page .benchmark-table thead th{border-top:1px solid var(--line);border-bottom:1px solid #aebdce;background:#f7f9fc}
+.full-page .benchmark-table tbody tr:has(+.ours)>*{border-top:1px solid #aebdce}
+.full-page .benchmark-table tbody tr:not(.ours):hover>*{background:#f7f9fc}
+.full-page .ours th,.full-page .ours td{background:#f1f5fc}
+
+/* The full chart stays visible; only the numeric comparison scrolls. */
+.full-page .performance-results{margin-top:16px;border:0;border-radius:0;overflow:visible}
+.full-page .performance-chart{padding:0;border:0;border-radius:0}
+.full-page .performance-table-heading{padding:8px var(--evidence-inset);margin-top:12px;background:white;border:0;border-top:1px solid #aebdce}
+.full-page .performance-results .scroll-hint{font-size:var(--text-caption)}
+.full-page .task-matrix{min-width:45.75rem;table-layout:fixed}
+.full-page .task-matrix col.model-column{width:9.5rem}
+.full-page .task-matrix .task-cup{width:3.375rem}
+.full-page .task-matrix .task-fruit{width:3rem}
+.full-page .task-matrix .task-stack{width:3.5rem}
+.full-page .task-matrix .task-cabinet{width:4rem}
+.full-page .task-matrix .task-basketball{width:5.125rem}
+.full-page .task-matrix .task-hang{width:3.25rem}
+.full-page .task-matrix .task-ring{width:4.5rem}
+.full-page .task-matrix .task-viewpoint{width:5.5rem}
+.full-page .task-matrix .task-height{width:4rem}
+.full-page .task-matrix th,.full-page .task-matrix td{padding:var(--cell-block) 6px;text-align:center;line-height:var(--leading-table)}
+.full-page .task-matrix thead th{background:white;border-top:0;border-bottom:1px solid var(--line)}
+.full-page .task-matrix .task-groups th{padding-block:5px;color:var(--muted);font-weight:var(--weight-medium);border-top:1px solid var(--line)}
+.full-page .task-matrix .task-groups .model-corner{background:white;border-top:1px solid var(--line);border-bottom:0}
+.full-page .task-matrix .model-corner,.full-page .task-matrix .model-heading,
+.full-page .task-matrix th[scope=row]{position:sticky;left:0;z-index:2;width:9.5rem;min-width:9.5rem;max-width:none;padding-left:var(--evidence-inset);padding-right:12px;text-align:left;white-space:nowrap;background:white;box-shadow:1px 0 var(--line)}
+.full-page .task-matrix .model-heading{vertical-align:middle}
+.full-page .task-matrix tbody tr.ours th[scope=row]{background:#f1f5fc}
+.full-page .task-matrix .task-group-start{border-left:1px solid var(--line)}
+.full-page .task-matrix tbody td{white-space:nowrap}
+.full-page .task-matrix tbody tr:last-child>*{border-bottom:0}
+.full-page .task-matrix sup{color:var(--muted);font-weight:var(--weight-regular)}
+
+@container(min-width:45.75rem){.full-page .performance-results .scroll-hint{display:none}}
+@container(max-width:45.749rem){.full-page .performance-results .scroll-hint{display:inline}}
+
+
+.full-page .hero h1{font-size:var(--text-display)}
+.full-page .paper-title{font-size:var(--text-subtitle)}
+.full-page .result-table th,.full-page .result-table td{padding:var(--cell-block) var(--evidence-inset);line-height:var(--leading-table)}
+.full-page .result-table th:first-child{text-align:left}
+.full-page .result-table thead th{border-top:1px solid var(--line);background:#f7f9fc}
+.full-page .result-table tbody th{white-space:normal}
+.full-page .analysis-grid th,.full-page .analysis-grid td{padding:var(--cell-block) var(--cell-inline)}
+.full-page .analysis-grid th:first-child{padding-left:var(--evidence-inset)}
+.full-page #libero-plus .benchmark-table{min-width:55rem}
+.full-page .instruction,.full-page .clip-description,.full-page .caption,
+.full-page .task-category>p,.full-page .setup-specs dt,.full-page .setup-specs dd span{font-size:var(--text-meta)}
+.full-page .clip-label,.full-page .setup-specs{font-size:var(--text-table)}
+.full-page .choices button{font-size:var(--text-meta)}
+.full-page .speed,.full-page .group-time,.full-page .control-scope{font-size:var(--text-micro)}
+.full-page .result-explanation{line-height:var(--leading-body)}
+.full-page .analysis-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr))}
+.full-page .analysis-grid>div{width:100%;max-width:30rem;justify-self:center}
+
+/* Source, evaluation protocol, and numbered conditions have distinct roles. */
+.evidence-details{margin:0;display:grid;gap:6px;font-size:var(--text-meta);line-height:1.5}
+.evidence-details>div{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:12px}
+.evidence-details dt{margin:0;font-weight:var(--weight-semibold);color:var(--ink)}
+.evidence-details dd{margin:0;min-width:0;color:var(--muted)}
+.evidence-details .source-join{margin-inline:6px}
+.evidence-details .source-detail{display:block;margin-top:3px}
+.evidence-details .table-source-link{display:inline;text-decoration-thickness:1px}
+.evidence-details .table-source-link>span{margin-left:4px}
+.full-page .evidence-details p{margin:0;text-align:left;hyphens:none}
+.variation-conditions{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.condition-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 16px;font-size:var(--text-meta);line-height:1.5}
+.condition-heading strong{font-weight:var(--weight-semibold);color:var(--ink)}
+.condition-heading span{color:var(--muted)}
+.condition-notes{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin:10px 0 0;padding:0;list-style:none;font-size:var(--text-meta);line-height:1.5}
+.condition-notes li{display:flex;align-items:baseline;gap:8px;min-width:0}
+.condition-number{color:var(--accent);font-weight:var(--weight-semibold);flex-shrink:0}
+.condition-notes strong{color:var(--ink);font-weight:var(--weight-medium)}
+.condition-notes .condition-description{display:block;color:var(--muted);margin-top:2px}
+
+@media(max-width:599px){
+  .full-page{--text-display:2.5rem;--text-title:1.5rem;--text-subtitle:1.25rem;--text-body:1rem}
+  .full-page .benchmark-table th:first-child{width:10.75rem;min-width:10.75rem;max-width:10.75rem}
+  .full-page .method-venue{margin-top:1px}
+  .full-page .table-caption{padding-inline:var(--evidence-inset)}
+  .evidence-details>div{grid-template-columns:1fr;gap:2px}
+  .evidence-details{gap:10px}
+  .condition-notes{grid-template-columns:1fr}
+}
+
+.full-page .efficiency-note{margin-top:12px;padding:0 var(--evidence-inset);text-align:left;hyphens:none}
+.full-page .efficiency-note strong{color:var(--ink)}

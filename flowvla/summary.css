@@ -1,6 +1,6 @@
 /* Default-page typography: system fonts and rem units follow browser preferences.
    Reference: https://getbootstrap.com/docs/5.3/content/reboot/#page-defaults
-   Kept here so the archived detailed view retains its existing presentation. */
+   Kept here so the separate detailed view retains its existing presentation. */
 .summary-page{
   --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
@@ -19,6 +19,11 @@
   --weight-bold:700;
   --leading-body:1.65;
   --leading-compact:1.4;
+  --leading-table:1.375;
+  --evidence-inset:1rem;
+
+  --cell-block:.375rem;
+  --cell-inline:.625rem;
   --body:var(--text-body);
   --section-title:var(--text-title);
   --subsection-title:var(--text-subtitle);
@@ -58,7 +63,6 @@
 .summary-result>h3{margin-bottom:8px}
 .summary-result+.summary-result{padding-top:24px;margin-top:24px;border-top:1px solid var(--line)}
 .summary-page .table-block{margin-top:14px}
-.robustness-result{margin-top:14px;font-size:var(--text-table)}
 .full-study{border-top:1px solid var(--line);padding:0}
 .full-study>a{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;min-height:88px;padding:20px 0;color:var(--ink)}
 .full-study>a:hover{text-decoration:none}
@@ -102,26 +106,75 @@
 .summary-page .player-time,.summary-page .overview-start small{font-size:var(--text-micro)}
 .summary-page .overview-start{font-size:var(--text-ui)}
 .summary-page pre{font-family:var(--font-mono);font-size:var(--text-meta);line-height:1.6}
-.summary-page table{font-family:var(--font-sans);font-size:var(--text-table);line-height:1.5}
+/* Evidence is compact through structure and spacing, with readable 16 px values. */
+.summary-page table{font-family:var(--font-sans);font-size:var(--text-table);line-height:var(--leading-table)}
 .summary-page thead th{font-size:var(--text-meta);font-weight:var(--weight-semibold);line-height:var(--leading-compact)}
-.summary-page .table-title{font-size:var(--text-body);font-weight:var(--weight-semibold)}
+.summary-page .table-title{font-size:var(--text-table);font-weight:var(--weight-semibold)}
 .summary-page .table-metric,.summary-page .table-provenance,
 .summary-page .table-source-link>span,.summary-page .table-footer .table-note,
-.summary-page .performance-table-heading,.summary-page .method-venue,
-.summary-page .task-matrix small{font-size:var(--text-meta);line-height:1.5}
+.summary-page .performance-table-heading,.summary-page .method-venue{font-size:var(--text-meta);line-height:1.5}
+.summary-page .table-block{border:0;border-radius:0;overflow:visible}
+.summary-page .table-caption{padding:8px var(--evidence-inset);background:white;border-top:1px solid #aebdce}
+.summary-page .table-footer{padding:10px var(--evidence-inset) 0;border-top:1px solid #aebdce;background:white}
+.summary-page .table-footer .table-note{margin-top:4px}
+.summary-page .table-provenance{column-gap:5px}
+.summary-page .table-source-label{font-weight:var(--weight-medium)}
+.summary-page .table-scroll-hint{padding:6px var(--evidence-inset)}
+.summary-page .benchmark-table{min-width:40rem}
+.summary-page .benchmark-table th,.summary-page .benchmark-table td{padding:var(--cell-block) var(--cell-inline)}
+.summary-page .benchmark-table th:first-child{padding-left:var(--evidence-inset)}
+.summary-page .benchmark-table th:last-child,.summary-page .benchmark-table td:last-child{padding-right:var(--evidence-inset)}
+.summary-page .benchmark-table thead th{border-top:1px solid var(--line);border-bottom:1px solid #aebdce;background:#f7f9fc}
+.summary-page .benchmark-table tbody tr:has(+.ours)>*{border-top:1px solid #aebdce}
+.summary-page .benchmark-table tbody tr:not(.ours):hover>*{background:#f7f9fc}
+.summary-page .ours th,.summary-page .ours td{background:#f1f5fc}
+
+/* The full chart stays visible; only the numeric comparison scrolls. */
+.summary-page .performance-results{margin-top:16px;border:0;border-radius:0;overflow:visible}
+.summary-page .performance-chart{padding:0;border:0;border-radius:0}
+.summary-page .performance-table-heading{padding:8px var(--evidence-inset);margin-top:12px;background:white;border:0;border-top:1px solid #aebdce}
 .summary-page .performance-results .scroll-hint{font-size:var(--text-caption)}
-.summary-page .benchmark-table{min-width:42.5rem}
-.summary-page .benchmark-table th,.summary-page .benchmark-table td{padding:9px 12px}
-.summary-page .benchmark-table tbody tr:has(+.ours)>*{border-top:2px solid #bac6d3}
-.summary-page .benchmark-table tbody tr:not(.ours):hover>*{background:#f5f8fc}
-.summary-page .performance-content{min-width:56.25rem}
-.summary-page .task-matrix .model-column{width:9.5rem}
-.summary-page .task-matrix th[scope=row],.summary-page .task-matrix th[rowspan]{width:9.5rem;min-width:9.5rem}
-.summary-page .task-matrix th,.summary-page .task-matrix td{padding:12px 6px}
-.summary-page .task-matrix td{white-space:nowrap}
-@container(max-width:56.249rem){.summary-page .performance-results .scroll-hint{display:inline}}
+.summary-page .task-matrix{min-width:45.75rem;table-layout:fixed}
+.summary-page .task-matrix col.model-column{width:9.5rem}
+.summary-page .task-matrix .task-cup{width:3.375rem}
+.summary-page .task-matrix .task-fruit{width:3rem}
+.summary-page .task-matrix .task-stack{width:3.5rem}
+.summary-page .task-matrix .task-cabinet{width:4rem}
+.summary-page .task-matrix .task-basketball{width:5.125rem}
+.summary-page .task-matrix .task-hang{width:3.25rem}
+.summary-page .task-matrix .task-ring{width:4.5rem}
+.summary-page .task-matrix .task-viewpoint{width:5.5rem}
+.summary-page .task-matrix .task-height{width:4rem}
+.summary-page .task-matrix th,.summary-page .task-matrix td{padding:var(--cell-block) 6px;text-align:center;line-height:var(--leading-table)}
+.summary-page .task-matrix thead th{background:white;border-top:0;border-bottom:1px solid var(--line)}
+.summary-page .task-matrix .task-groups th{padding-block:5px;color:var(--muted);font-weight:var(--weight-medium);border-top:1px solid var(--line)}
+.summary-page .task-matrix .task-groups .model-corner{background:white;border-top:1px solid var(--line);border-bottom:0}
+.summary-page .task-matrix .model-corner,.summary-page .task-matrix .model-heading,
+.summary-page .task-matrix th[scope=row]{position:sticky;left:0;z-index:2;width:9.5rem;min-width:9.5rem;max-width:none;padding-left:var(--evidence-inset);padding-right:12px;text-align:left;white-space:nowrap;background:white;box-shadow:1px 0 var(--line)}
+.summary-page .task-matrix .model-heading{vertical-align:middle}
+.summary-page .task-matrix tbody tr.ours th[scope=row]{background:#f1f5fc}
+.summary-page .task-matrix .task-group-start{border-left:1px solid var(--line)}
+.summary-page .task-matrix tbody td{white-space:nowrap}
+.summary-page .task-matrix tbody tr:last-child>*{border-bottom:0}
+.summary-page .task-matrix sup{color:var(--muted);font-weight:var(--weight-regular)}
+.summary-page .performance-results .table-footer{padding-top:10px}
+.condition-notes{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-top:8px;font-size:var(--text-meta);line-height:1.5;color:var(--muted)}
+.condition-notes p{margin:0;text-align:left}
+@container(min-width:45.75rem){.summary-page .performance-results .scroll-hint{display:none}}
+@container(max-width:45.749rem){.summary-page .performance-results .scroll-hint{display:inline}}
+
+/* Related evidence reads as a separate destination, not a table footnote. */
+.related-result{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;margin-top:28px;padding:14px var(--evidence-inset);border-left:2px solid var(--line);background:#f8fafc}
+.related-result h4{font-size:var(--text-table);font-weight:var(--weight-semibold);letter-spacing:0;line-height:1.4}
+.related-result p{font-size:var(--text-meta);line-height:1.5;color:var(--muted);margin-top:3px;text-align:left;hyphens:none}
+.related-result>a,.section-paper{display:inline-flex;align-items:center;min-height:44px;font-size:var(--text-meta);font-weight:var(--weight-medium);white-space:nowrap}
+.section-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 20px;margin-bottom:10px}
+.summary-page .section-heading h2{margin:0}
+.summary-page #real-world>p,.summary-page .summary-result>p{text-align:left;hyphens:none}
 @media(max-width:600px){
-  .summary-page .benchmark-table th:first-child{width:10rem;min-width:10rem;max-width:10rem}
-  .summary-page .benchmark-table th,.summary-page .benchmark-table td{padding:9px 10px}
-  .summary-page .method-venue{margin-top:3px}
+  .summary-page .benchmark-table th:first-child{width:10.75rem;min-width:10.75rem;max-width:10.75rem}
+  .summary-page .method-venue{margin-top:1px}
+  .condition-notes{grid-template-columns:1fr;gap:6px}
+  .related-result{align-items:flex-start;flex-direction:column;gap:4px;padding-block:12px}
+  .section-heading{align-items:baseline;column-gap:12px}
 }

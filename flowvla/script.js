@@ -31,7 +31,7 @@
     const previous = $('.control-icon', b); if (previous) previous.replaceWith(icon); else b.prepend(icon);
   }
   const button = (cls, state, label, grouped = false) => {
-    const b = node('button', `${cls} control-button`); b.type = 'button'; buttonState(b, state, label);
+    const b = node('button', `${cls} control-button media-action${grouped ? "" : " media-action--icon"}`); b.type = 'button'; buttonState(b, state, label);
     if (grouped) { const scope = node('span', 'control-scope', 'All'); scope.setAttribute('aria-hidden', 'true'); b.append(scope); }
     return b;
   };
@@ -216,9 +216,12 @@
         dialogContext.hidden = !dialogContext.textContent;
       }
       const position = v.currentTime;
-      const viewport = v.closest('.video-viewport');
-      expanded.closest('.video-viewport').setAttribute('style', viewport?.getAttribute('style') || '');
-      expanded.closest('.media-shell').style.setProperty('--expanded-ratio', viewport?.style.getPropertyValue('--video-ratio') || 4/3);
+      const viewport = v.closest('.video-viewport'), expandedViewport = expanded.closest('.video-viewport');
+      const rect = viewport?.getBoundingClientRect(), ratio = rect?.height ? rect.width / rect.height : 4/3;
+      expandedViewport.setAttribute('style', viewport?.getAttribute('style') || '');
+      expandedViewport.style.setProperty('--video-ratio', ratio);
+      expandedViewport.toggleAttribute('data-panel-view', viewport?.hasAttribute('data-panel-view') || false);
+      expanded.closest('.media-shell').style.setProperty('--expanded-ratio', ratio);
       const expandedState = states.get(expanded);
       expandedState.title = title; expanded.dataset.duration = duration(v); expanded.poster = v.poster;
       expanded.controls = false; expanded.setAttribute('aria-label', title);
@@ -234,7 +237,7 @@
   $$('.media-group').forEach(root => {
     const members = $$('video', root).filter(v => states.has(v)); if (!members.length) return;
     const label = root.dataset.groupLabel || 'Videos', ui = toolbar('group', label, true);
-    const individual = node('button', 'group-individual', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.bar.append(individual);
+    const individual = node('button', 'group-individual media-action', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.bar.append(individual);
     const g = { root, individual, videos: members, ui, label, token: 0, time: 0, pending: false, running: false, coordinated: false, seeking: false, master: members[0], sync: members.every(v => v.dataset.sync === 'aggregation') };
     groups.push(g); members.forEach(v => membership.set(v, g)); root.append(ui.bar);
     individual.addEventListener('click', () => individualMode(g, true));

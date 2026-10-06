@@ -239,10 +239,10 @@
     var diagramImage = fig.querySelector('img');
     var imageReady = diagramImage.complete && diagramImage.naturalWidth > 0;
     var curStage = -1;
-    var labels = ['Recover 3D motion', 'Connect motion to control', 'Keep inference unchanged'];
+    var visited = new Set();
     var status = root.querySelector('.method-animation-status');
     var toggleLabel = root.querySelector('.method-toggle-label');
-    var toggleIcon = root.querySelector('.method-toggle-icon');
+    var togglePath = root.querySelector('.method-toggle-path');
     var replay = root.querySelector('.method-replay');
 
     function render(t) {
@@ -272,21 +272,28 @@
       }
       if (k !== curStage) {
         curStage = k;
-        steps.forEach(function (b, j) {
-          b.setAttribute('aria-pressed', String(j === k));
-          b.style.setProperty('--method-progress', j < k ? '1' : '0');
+        visited.add(k);
+        steps.forEach(function (button, index) {
+          var selected = index === k;
+          button.setAttribute('aria-pressed', String(selected));
+          if (selected) button.setAttribute('aria-current', 'step');
+          else button.removeAttribute('aria-current');
+          button.querySelector('.method-stage-state').textContent = selected ? 'Current step' : visited.has(index) ? 'Viewed' : '';
         });
-        status.textContent = (k + 1) + ' / 3 · ' + labels[k];
       }
-      steps[k].style.setProperty('--method-progress', (completed ? 1 : clamp01(ts / dur)).toFixed(3));
+      status.textContent = completed ? 'Walkthrough complete' : 'Step ' + (k + 1) + ' of 3';
     }
     function updateControls() {
       var running = !paused && !completed;
+      var label = running ? 'Pause method animation' : completed ? 'Play method animation again' : 'Play method animation';
       toggleLabel.textContent = running ? 'Pause' : 'Play';
-      toggleIcon.textContent = running ? 'Ⅱ' : '▶';
-      toggle.setAttribute('aria-label', running ? 'Pause method animation' : completed ? 'Play method animation again' : 'Play method animation');
+      togglePath.setAttribute('d', running ? 'M7 4h4v16H7zM15 4h4v16h-4z' : 'M7 4v16l13-8z');
+      togglePath.setAttribute('fill', 'currentColor');
+      togglePath.setAttribute('stroke', 'none');
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
       root.dataset.state = completed ? 'complete' : running ? 'playing' : 'paused';
-      if (completed) status.textContent = '3 / 3 · Inference unchanged';
+      status.textContent = completed ? 'Walkthrough complete' : 'Step ' + (curStage + 1) + ' of 3';
     }
     function stopFrame() {
       if (raf) cancelAnimationFrame(raf);
@@ -314,6 +321,8 @@
     }
     function restart() {
       completed = false;
+      visited.clear();
+      curStage = -1;
       clock = 0;
       render(clock);
       setPaused(false);
@@ -326,15 +335,30 @@
     root.querySelectorAll('[data-figure-title]').forEach(function (link) {
       link.addEventListener('click', function () { setPaused(true); });
     });
+    function selectStage(index) {
+      completed = false;
+      clock = START[index] + STAGE[index] * 0.62;
+      render(clock);
+      setPaused(true);
+    }
+    function followStageHash(initial) {
+      var id;
+      try { id = decodeURIComponent(window.location.hash.slice(1)); }
+      catch (_) { return; }
+      if (!id) return;
+      var index = steps.findIndex(function (button) {
+        return button.parentElement.id === id;
+      });
+      if (index >= 0) {
+        if (initial === true) { visited.clear(); curStage = -1; }
+        selectStage(index);
+      }
+    }
     steps.forEach(function (button, index) {
       button.disabled = false;
-      button.addEventListener('click', function () {
-        completed = false;
-        clock = START[index] + STAGE[index] * 0.62;
-        render(clock);
-        setPaused(true);
-      });
+      button.addEventListener('click', function () { selectStage(index); });
     });
+    window.addEventListener('hashchange', followStageHash);
     diagramImage.addEventListener('load', function () { imageReady = true; schedule(); });
     diagramImage.addEventListener('error', function () { imageReady = false; setPaused(true); });
     document.addEventListener('visibilitychange', schedule);
@@ -354,6 +378,7 @@
     root.querySelector('.method-animation-toolbar').hidden = false;
     render(paused ? STAGE[0] * 0.62 : 0);
     updateControls();
+    followStageHash(true);
     schedule();
   }
 

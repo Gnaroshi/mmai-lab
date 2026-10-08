@@ -98,7 +98,12 @@
     if (g.coordinated && g.running) g.time = g.master.currentTime;
     buttonState(g.ui.play, g.pending ? 'loading' : active ? 'pause' : 'play', `${g.pending ? 'Cancel loading' : active ? 'Pause' : 'Play'} all videos in ${g.label}`);
     $('.control-scope', g.ui.play).textContent = g.pending ? 'Cancel' : active ? 'Pause all' : 'Play all';
-    g.ui.timeline.hidden = !g.coordinated;
+    // Keep one stable transport rail in both modes. The shared scrubber only
+    // becomes operable when it represents a coordinated playback position.
+    g.ui.timeline.hidden = false;
+    g.ui.seek.disabled = !g.coordinated;
+    g.individual.disabled = !g.coordinated;
+    g.ui.seek.title = g.coordinated ? `Seek ${g.label}` : 'Play all to use the shared timeline';
     g.root.classList.toggle('is-coordinated', g.coordinated);
     g.ui.bar.dataset.mode = g.coordinated ? 'together' : 'individual';
     g.videos.forEach(v => {
@@ -258,7 +263,7 @@
   $$('.media-group').forEach(root => {
     const members = $$('video', root).filter(v => states.has(v)); if (!members.length) return;
     const label = root.dataset.groupLabel || 'Videos', ui = toolbar('group', label, true);
-    const individual = node('button', 'group-individual media-action', 'Individual controls'); individual.type = 'button'; individual.setAttribute('aria-label', `Use individual controls for ${label}`); ui.timeline.append(individual);
+    const individual = node('button', 'group-individual media-action', 'Individual'); individual.type = 'button'; labelButton(individual, `Use individual controls for ${label}`); ui.timeline.append(individual);
     const g = { root, individual, videos: members, ui, label, token: 0, time: 0, pending: false, running: false, coordinated: false, seeking: false, master: members[0], sync: members.every(v => v.dataset.sync === 'aggregation') };
     groups.push(g); members.forEach(v => membership.set(v, g)); root.append(ui.bar);
     individual.addEventListener('click', () => individualMode(g, true));
